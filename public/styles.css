@@ -179,7 +179,7 @@ html{
     justify-content: center;
     font-size: 17px;
     gap: 20px;
-    height: 70px;
+    height: 90px;
     width: 100%;
     position: fixed;
     bottom: 0;
@@ -427,6 +427,18 @@ main {
 .message.success { background: green; }
 .message.error { background: red; }
 
+.footer-nav__item{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.svg{
+    width: 20px;
+    height: 20px;
+    
+}
 
   @media (max-width:760px){
     :root{ --viewport-w:92vw; }
