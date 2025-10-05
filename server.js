@@ -33,12 +33,24 @@ app.post('/api/user/init', async (req, res) => {
 
     let user = await User.findOne({ telegramId });
     if (!user) {
-        user = new User({ telegramId, firstName, username, avatarUrl, balance: 0, subscribedChannels: [] });
+        user = new User({
+            telegramId,
+            firstName,
+            username,
+            avatarUrl,
+            balance: 0,
+            totalEarned: 0, // 💰 добавляем поле при создании
+            subscribedChannels: []
+        });
         await user.save();
     }
 
-    // Возвращаем баланс и подписанные каналы
-    res.json({ balance: user.balance, subscribedChannels: user.subscribedChannels });
+    // Возвращаем баланс, totalEarned и подписанные каналы
+    res.json({
+        balance: user.balance,
+        totalEarned: user.totalEarned || 0,
+        subscribedChannels: user.subscribedChannels
+    });
 });
 
 // ================================
@@ -53,16 +65,26 @@ app.post('/api/user/update', async (req, res) => {
 
     // Обновляем баланс
     user.balance += delta;
+
+    // 💰 добавляем в totalEarned, если delta положительная
+    if (delta > 0) {
+        user.totalEarned = (user.totalEarned || 0) + delta;
+    }
+
     if (user.balance < 0) user.balance = 0;
 
-    // Добавляем канал, если он указан и еще не был подписан
+    // Добавляем канал, если он указан и ещё не был подписан
     if (channel && !user.subscribedChannels.includes(channel)) {
         user.subscribedChannels.push(channel);
     }
 
     await user.save();
 
-    res.json({ balance: user.balance, subscribedChannels: user.subscribedChannels });
+    res.json({
+        balance: user.balance,
+        totalEarned: user.totalEarned,
+        subscribedChannels: user.subscribedChannels
+    });
 });
 
 // ================================
@@ -80,7 +102,10 @@ app.post('/api/user/spin', async (req, res) => {
     user.balance -= cost;
     await user.save();
 
-    res.json({ balance: user.balance });
+    res.json({
+        balance: user.balance,
+        totalEarned: user.totalEarned || 0
+    });
 });
 
 // ================================
