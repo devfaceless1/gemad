@@ -1,9 +1,7 @@
 (function () {
-    const tg = window.Telegram?.WebApp;
-    if (!tg) return;
-
+    const tgWebApp = window.Telegram && window.Telegram.WebApp;
+    const tg = tgWebApp;
     tg.expand();
-    window.telegramId = tg.initDataUnsafe?.user?.id;
 
     window.userBalance = 0;
     const starsBalanceEl = document.getElementById('stars-balance');
@@ -12,33 +10,11 @@
         if (starsBalanceEl) starsBalanceEl.textContent = `${window.userBalance} ⭐`;
     }
 
-    async function fetchBalance() {
-        if (!window.telegramId) return;
-        const res = await fetch(`/api/user/${window.telegramId}`);
-        const data = await res.json();
-        window.userBalance = data.balance || 0;
-        updateBalanceUI();
-    }
-
-    fetchBalance();
-
-    // Отображение пользователя
-    const user = tg.initDataUnsafe?.user;
-    if (user) {
-        const nameEl = document.getElementById('name');
-        if (nameEl) nameEl.textContent = user.first_name || 'User';
-
-        const avatarEl = document.getElementById('avatar');
-        if (avatarEl) {
-            if (user.photo_url) avatarEl.src = user.photo_url;
-            else if (user.username) avatarEl.src = `https://t.me/i/userpic/320/${user.username}.jpg`;
-        }
-
-        const starsEarnedEl = document.getElementById('stars-earned');
-        if (starsEarnedEl) starsEarnedEl.textContent = '0 Stars earned';
-    }
+    updateBalanceUI();
 
     const subscribedChannels = new Set();
+
+    // Контейнер для сообщений
     let messageContainer = document.getElementById('telegram-messages');
     if (!messageContainer) {
         messageContainer = document.createElement('div');
@@ -74,8 +50,9 @@
         setTimeout(() => msg.remove(), duration);
     }
 
+    // Подписка на каналы
     document.querySelectorAll('.ad-link').forEach(link => {
-        link.addEventListener('click', async (e) => {
+        link.addEventListener('click', (e) => {
             e.preventDefault();
             const channelUrl = link.getAttribute('href');
             if (!channelUrl || channelUrl === '#') return;
@@ -88,23 +65,30 @@
             const starsMatch = link.textContent.match(/\d+(\.\d+)?/);
             const starsToAdd = starsMatch ? parseFloat(starsMatch[0]) : 0;
 
-            // Обновление баланса на сервере
-            if (window.telegramId && starsToAdd > 0) {
-                const res = await fetch("/api/user/spin", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ telegramId: window.telegramId, cost: -starsToAdd })
-                });
-                const data = await res.json();
-                if (!data.error) window.userBalance = data.balance;
-                updateBalanceUI();
-            }
-
+            window.userBalance += starsToAdd;
+            updateBalanceUI();
             subscribedChannels.add(channelUrl);
             showMessage(`You earned ${starsToAdd} ⭐!`, 'success');
 
+            // Открываем канал
             window.open(channelUrl, '_blank');
         });
     });
 
+    // Отображение пользователя
+    const user = tg.initDataUnsafe?.user;
+    if (user) {
+        window.telegramId = user.id; // Сохраняем для API спина
+        const nameEl = document.getElementById('name');
+        if (nameEl) nameEl.textContent = user.first_name || 'User';
+
+        const avatarEl = document.getElementById('avatar');
+        if (avatarEl) {
+            if (user.photo_url) avatarEl.src = user.photo_url;
+            else if (user.username) avatarEl.src = `https://t.me/i/userpic/320/${user.username}.jpg`;
+        }
+
+        const starsEarnedEl = document.getElementById('stars-earned');
+        if (starsEarnedEl) starsEarnedEl.textContent = '0 Stars earned';
+    }
 })();
