@@ -79,7 +79,9 @@
         });
     });
 
-    // Сообщения
+    // =====================
+    // Сообщения (уведомления)
+    // =====================
     let messageContainer = document.getElementById('telegram-messages');
     if (!messageContainer) {
         messageContainer = document.createElement('div');
@@ -87,32 +89,61 @@
         document.body.appendChild(messageContainer);
         Object.assign(messageContainer.style, {
             position: 'fixed',
-            top: '50%',
+            bottom: '30px',
             left: '50%',
-            transform: 'translate(-50%, -50%)',
+            transform: 'translateX(-50%)',
             zIndex: 9999,
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: 'column-reverse',
             alignItems: 'center',
             gap: '10px',
             pointerEvents: 'none',
         });
     }
 
-    function showMessage(text, type = 'message', duration = 1500) {
+    let isMessageActive = false; // 🚫 Антиспам
+
+    function showMessage(text, type = 'message', duration = 2000) {
+        if (isMessageActive) return;
+        isMessageActive = true;
+
         const msg = document.createElement('div');
         msg.textContent = text;
+
+        let bgColor = '#2196f3';
+        if (type === 'success') bgColor = '#4caf50';
+        if (type === 'error') bgColor = '#e53935';
+
         Object.assign(msg.style, {
-            padding: '12px 20px',
-            background: type === 'success' ? '#4caf50' : '#ff4c4c',
+            padding: '14px 24px',
+            background: bgColor,
             color: '#fff',
-            borderRadius: '8px',
+            borderRadius: '12px',
             fontWeight: '600',
+            fontSize: '15px',
             textAlign: 'center',
-            minWidth: '200px',
+            minWidth: '220px',
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.25)',
+            opacity: '0',
+            transform: 'translateY(20px)',
+            transition: 'opacity 0.3s ease, transform 0.3s ease',
         });
+
         messageContainer.appendChild(msg);
-        setTimeout(() => msg.remove(), duration);
+
+        requestAnimationFrame(() => {
+            msg.style.opacity = '1';
+            msg.style.transform = 'translateY(0)';
+        });
+
+        setTimeout(() => {
+            msg.style.opacity = '0';
+            msg.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                msg.remove();
+                isMessageActive = false;
+            }, 300);
+        }, duration);
     }
 
     window.updateBalance = updateBalance;
