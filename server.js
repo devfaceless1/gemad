@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { User } from './userModel.js';
 
 dotenv.config();
 
@@ -12,8 +13,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json()); // для POST запросов
-
 // Подключение к MongoDB
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -22,62 +21,36 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Модель пользователя
-const userSchema = new mongoose.Schema({
-    telegramId: { type: String, required: true, unique: true },
-    balance: { type: Number, default: 0 }
-});
-
-const User = mongoose.model('User', userSchema);
-
-// Раздача статических файлов
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API: получить баланс пользователя
-app.get('/api/user/:telegramId', async (req, res) => {
-    const { telegramId } = req.params;
-    try {
-        let user = await User.findOne({ telegramId });
-        if (!user) {
-            user = new User({ telegramId });
-            await user.save();
-        }
-        res.json({ balance: user.balance });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
+// Инициализация пользователя
+app.post('/api/user/init', async (req, res) => {
+    const { telegramId, firstName, username, avatarUrl } = req.body;
+    if (!telegramId) return res.status(400).json({ error: 'No telegramId' });
 
-// API: списать звёзды при спине
-app.post('/api/user/spin', async (req, res) => {
-    const { telegramId, cost } = req.body;
-    try {
-        let user = await User.findOne({ telegramId });
-        if (!user) user = await new User({ telegramId }).save();
-
-        if (user.balance < cost) return res.json({ error: 'Not enough stars', balance: user.balance });
-
-        user.balance -= cost;
+    let user = await User.findOne({ telegramId });
+    if (!user) {
+        user = new User({ telegramId, firstName, username, avatarUrl, balance: 0 });
         await user.save();
-        res.json({ balance: user.balance });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
     }
+
+    res.json({ balance: user.balance });
 });
 
-// Простейший API для проверки каналов
-app.get('/api/channels', async (req, res) => {
-    try {
-        const Channel = mongoose.model('Channel', new mongoose.Schema({
-            name: String,
-            link: String,
-            stars: Number
-        }));
-        const channels = await Channel.find();
-        res.json(channels);
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-    }
+// Обновление баланса
+app.post('/api/user/update', async (req, res) => {
+    const { telegramId, delta } = req.body;
+    if (!telegramId) return res.status(400).json({ error: 'No telegramId' });
+
+    const user = await User.findOne({ telegramId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.balance += delta;
+    if (user.balance < 0) user.balance = 0;
+    await user.save();
+
+    res.json({ balance: user.balance });
 });
 
 // Отправка index.html на любой другой маршрут
