@@ -30,6 +30,12 @@ html{
     display: flex;
 }
 
+.user-name{
+    font-size: 18px;
+    font-weight: 600;
+    font-family: "Lexend", sans-serif;
+}
+
 .user-info{
     display: flex;
     

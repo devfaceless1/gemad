@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     username: String,
     avatarUrl: String,
     balance: { type: Number, default: 0 },
-    subscribedChannels: { type: [String], default: [] }
+    subscribedChannels: { type: [String], default: [] }, // новое поле
 });
 
 export const User = mongoose.model('User', userSchema);

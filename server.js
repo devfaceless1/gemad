@@ -33,7 +33,7 @@ app.post('/api/user/init', async (req, res) => {
 
     let user = await User.findOne({ telegramId });
     if (!user) {
-        user = new User({ telegramId, firstName, username, avatarUrl, balance: 0 });
+        user = new User({ telegramId, firstName, username, avatarUrl, balance: 0, subscribedChannels: [] });
         await user.save();
     }
 
@@ -51,6 +51,7 @@ app.post('/api/user/update', async (req, res) => {
     const user = await User.findOne({ telegramId });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    // Обновляем баланс
     user.balance += delta;
     if (user.balance < 0) user.balance = 0;
 
@@ -65,7 +66,7 @@ app.post('/api/user/update', async (req, res) => {
 });
 
 // ================================
-// Маршрут для кейса / спина
+// Кейсы / спин
 // ================================
 app.post('/api/user/spin', async (req, res) => {
     const { telegramId, cost } = req.body;
@@ -80,6 +81,17 @@ app.post('/api/user/spin', async (req, res) => {
     await user.save();
 
     res.json({ balance: user.balance });
+});
+
+// ================================
+// Админ: сброс баланса (опционально)
+// ================================
+app.post('/api/admin/reset-balances', async (req, res) => {
+    const secret = req.headers['x-admin-secret'] || req.body.secret;
+    if (!secret || secret !== process.env.ADMIN_SECRET) return res.status(403).json({ error: 'Forbidden' });
+
+    const result = await User.updateMany({}, { $set: { balance: 0, subscribedChannels: [] } });
+    res.json({ ok: true, modifiedCount: result.modifiedCount ?? result.nModified ?? result });
 });
 
 // ================================
