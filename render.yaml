@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: gemad
+    env: node
+    region: frankfurt  
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    plan: free
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: PORT
+        value: 3000
