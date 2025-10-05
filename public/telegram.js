@@ -55,29 +55,32 @@
 
     // Подписка на каналы
     document.querySelectorAll('.ad-link').forEach(link => {
-        link.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const channelUrl = link.getAttribute('href');
-            if (!channelUrl || channelUrl === '#') return;
+    link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const channelUrl = link.getAttribute('href');
+        if (!channelUrl || channelUrl === '#') return;
 
-            const channelUsername = channelUrl.replace('https://t.me/', '').replace('/', '');
+        // Берем username канала из ссылки
+        const channelUsername = channelUrl.replace('https://t.me/', '').replace('/', '');
 
-            if (window.subscribedChannels.has(channelUsername)) {
-                showMessage('You already received stars for this channel!', 'error');
-                return;
-            }
+        // Проверяем, не начисляли ли уже звезды за этот канал
+        if (window.subscribedChannels.has(channelUsername)) {
+            showMessage('You already received stars for this channel!', 'error');
+            return;
+        }
 
-            const starsMatch = link.textContent.match(/\d+(\.\d+)?/);
-            const starsToAdd = starsMatch ? parseFloat(starsMatch[0]) : 0;
+        // Получаем количество звезд из текста кнопки
+        const starsMatch = link.textContent.match(/\d+(\.\d+)?/);
+        const starsToAdd = starsMatch ? parseFloat(starsMatch[0]) : 0;
 
-            await updateBalance(starsToAdd, channelUsername);
-            showMessage(`You earned ${starsToAdd} ⭐!`, 'success');
+        // Обновляем баланс на сервере
+        await updateBalance(starsToAdd, channelUsername);
+        showMessage(`You earned ${starsToAdd} ⭐!`, 'success');
 
-            // Открываем канал внутри Telegram
-            tg.openLink(`https://t.me/${channelUsername}`);
-
-        });
+        // Открываем канал внутри Telegram без перехода в браузер
+        tg.openChat(channelUsername);
     });
+});
 
     // Сообщения
     let messageContainer = document.getElementById('telegram-messages');
