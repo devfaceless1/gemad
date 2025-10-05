@@ -14,6 +14,14 @@ html{
     border-radius: 50%;
 }
 
+.section__title{
+    font-size: 22px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
 .header__content{
     display: flex;
     background: #2a3549;
@@ -174,9 +182,7 @@ html{
     margin-bottom: 15px;
 }
 
-.footer-nav__item.active a {
-    color: #dddddd;
-}
+
 
 header {
     position: fixed;
@@ -188,7 +194,7 @@ header {
 
 main {
     padding-top: 60px;   /* высота header */
-    padding-bottom: 60px; /* высота footer */
+    padding-bottom: 15px; /* высота footer */
     position: relative;
 }
 
@@ -268,28 +274,26 @@ main {
 }
 
 .case-durov{
-    background:#0b1020;
+    background:#131825;
     color:#fff;
     width: 100%;
     display:flex;
     flex-direction:column;
     align-items:center;
-    padding:36px;
+    
     min-height:85vh;
     box-sizing:border-box;
-    
+    padding: 0 15px;
+    margin-top: 15px;
 }
 
 
 
 .back-button{
     display: flex;
-    font-size: 10px;
-    color: #fff;
-    font-weight: 600;
     width: 35px;
     height: 35px;
-    border-radius: 50%;
+    border-radius: 25%;
     background-color: #8096bb;
     justify-content: center;
     align-items: center;
@@ -305,26 +309,26 @@ main {
   .viewport{
     width:var(--viewport-w);
     height:var(--viewport-h);
-    background:linear-gradient(180deg,#111,#0e1420);
+    background: #1e2533;
     border-radius:12px;
     overflow:hidden;
     position:relative;
-    box-shadow:0 20px 40px rgba(0,0,0,0.6);
-    margin-top: 20px;
+    box-shadow:0 20px 20px rgba(0,0,0,0.6);
+    
   }
 
   .strip{
     position:absolute;
-    left:0; top:20px; /* небольшой отступ сверху */
+    left:0; top:20px;
     display:flex;
-    gap:5px;             /* GAP (в JS тоже) */
+    gap:5px;            
     align-items:center;
     will-change:transform;
     transform:translateX(0px);
   }
 
   .item{
-    width:100px;          /* ITEM_WIDTH (в JS тоже) */
+    width:100px;         
     height:100px;
     border-radius:8px;
     display:flex;
@@ -344,7 +348,7 @@ main {
     top:0;
     bottom:0;
     width:3px;
-    background:linear-gradient(180deg,#fff,#bbb);
+    background: #ffffffab;
     transform:translateX(-50%);
     box-shadow:0 0 0 6px rgba(255,255,255,0.02) inset;
   }
@@ -358,8 +362,9 @@ main {
     border-radius:10px;
     border:0;
     cursor:pointer;
-    background:#53617a;
-    color:white;
+    
+    background: #313e57;
+    color: #fff;
   }
 
   #result{
@@ -480,12 +485,8 @@ main {
 
 @media screen and (max-width: 370px) {
     .section-header__blocks{
-        grid-template-columns: 1fr ;
+        grid-template-columns: 1fr;
     }
-    .ad-block__bottom{
-        padding: 0 20px;
-    }
-    
     .section-cases__blocks{
         grid-template-columns: 1fr ;
     }
