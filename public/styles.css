@@ -193,7 +193,7 @@ html{
 }
 
 .footer-nav__item.active a {
-    color: #8096bb;
+    color: #dddddd;
 }
 
 header {
@@ -427,12 +427,14 @@ main {
 .message.success { background: green; }
 .message.error { background: red; }
 
-.footer-nav__item{
+.ad-navigation{
     display: flex;
     align-items: center;
+    justify-content: center;
     flex-direction: column;
-    gap: 2px;
-}
+    gap: 5px;
+    
+}   
 
 .svg{
     width: 20px;
