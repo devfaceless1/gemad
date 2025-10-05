@@ -79,11 +79,11 @@ html{
 
 /* ================== AD как CASE ================== */
 .section-header__blocks {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 15px;
     width: 100%;
-    color: #fff;
-    justify-content: center;
-    min-height: 100vh;
+    margin: 0 auto;
 }
 
 .ad-block {
