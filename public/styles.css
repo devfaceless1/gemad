@@ -77,18 +77,16 @@ html{
     margin-bottom: 85px;
 }
 
-.section-header__blocks{
+/* ================== AD как CASE ================== */
+.section-header__blocks {
     display: grid;
     grid-template-columns: auto auto auto;
     gap: 15px;
     width: 100%;
     margin: 0 auto;
-
-    
-    
 }
 
-.ad-block{
+.ad-block {
     border-radius: 15px;
     position: relative;
     background-color: #1e2533;
@@ -97,33 +95,49 @@ html{
     min-width: 180px;
 }
 
-.ad-block__img{
+.ad-block__img {
     width: 100%;
     border-radius: 15px;
     height: auto;
 }
 
-.ad-block__bottom{
+.ad-block__bottom {
     font-family: "Lexend", sans-serif;
     font-weight: 600;
     padding: 10px;
-    
 }
 
-.block-bottom__item{
-    margin-top: 5px;
-    
+.ad-block__title {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 800;
 }
 
+.ad-block__desc {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #bbb;
+}
 
-.ad-block__description{
-    max-width: 100%;
+.ad-block__price {
+    margin-top: 10px;
+    font-weight: 600;
+    background: #53617a;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    justify-content: center;
+    display: flex;
     align-items: center;
-   
-    
 }
 
-.ad-link{
+.ad-block__text {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ad-link {
     padding: 10px;
     display: flex;
     justify-content: center;
@@ -134,41 +148,8 @@ html{
     transition: all 1s ease;
 }
 
-.ad-link:hover{
+.ad-link:hover {
     background: #313e57;
-}
-
-.ad-block__title{
-    margin-top: 10px;
-    font-size: 18px;
-  
-    
-}
-
-.ad-block__text{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    
-}
-
-.ad-block__desc{
-    margin-top: 10px;
-    font-size: 14px;
-    color: #bbb;
-}
-
-.ad-block__price{
-    margin-top: 10px;
-    font-weight: 600;
-    background: #53617a;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 14px;
-    justify-content: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .ad-link__mobile{
