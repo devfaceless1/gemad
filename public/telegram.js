@@ -10,6 +10,9 @@
     const username = user.username;
     const avatarUrl = user.photo_url || (user.username ? `https://t.me/i/userpic/320/${user.username}.jpg` : '');
 
+    // Сохраняем telegramId глобально, чтобы spin.js и другие скрипты могли его использовать
+    window.telegramId = telegramId;
+
     // Элементы UI
     const starsBalanceEl = document.getElementById('stars-balance');
     const nameEl = document.getElementById('name');
@@ -42,7 +45,7 @@
         const res = await fetch('/api/user/update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ telegramId, delta, channelUsername })
+            body: JSON.stringify({ telegramId, delta, channel: channelUsername })
         });
         const data = await res.json();
         window.userBalance = data.balance;
