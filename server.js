@@ -12,6 +12,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.json()); // для POST запросов
+
 // Подключение к MongoDB
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -20,71 +22,65 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Модели
-const User = mongoose.model('User', new mongoose.Schema({
+// Модель пользователя
+const userSchema = new mongoose.Schema({
     telegramId: { type: String, required: true, unique: true },
-    firstName: String,
-    username: String,
-    photoUrl: String,
     balance: { type: Number, default: 0 }
-}));
+});
 
-const Channel = mongoose.model('Channel', new mongoose.Schema({
-    name: String,
-    link: String,
-    stars: Number
-}));
+const User = mongoose.model('User', userSchema);
 
-// Middleware
-app.use(express.json());
+// Раздача статических файлов
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API: Получение списка каналов
-app.get('/api/channels', async (req, res) => {
+// API: получить баланс пользователя
+app.get('/api/user/:telegramId', async (req, res) => {
+    const { telegramId } = req.params;
     try {
-        const channels = await Channel.find();
-        res.json(channels);
+        let user = await User.findOne({ telegramId });
+        if (!user) {
+            user = new User({ telegramId });
+            await user.save();
+        }
+        res.json({ balance: user.balance });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// API: Спин / списание звезд
+// API: списать звёзды при спине
 app.post('/api/user/spin', async (req, res) => {
+    const { telegramId, cost } = req.body;
     try {
-        const { telegramId, cost } = req.body;
-        if (!telegramId) return res.status(400).json({ error: "No telegramId" });
-
         let user = await User.findOne({ telegramId });
-        if (!user) {
-            user = new User({ telegramId, balance: 0 });
-        }
+        if (!user) user = await new User({ telegramId }).save();
 
-        if (user.balance < cost) return res.json({ error: "Not enough stars" });
+        if (user.balance < cost) return res.json({ error: 'Not enough stars', balance: user.balance });
 
         user.balance -= cost;
         await user.save();
-
         res.json({ balance: user.balance });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: 'Server error' });
     }
 });
 
-// API: Получение информации о пользователе (по желанию)
-app.get('/api/user/:telegramId', async (req, res) => {
+// Простейший API для проверки каналов
+app.get('/api/channels', async (req, res) => {
     try {
-        const user = await User.findOne({ telegramId: req.params.telegramId });
-        res.json(user || {});
+        const Channel = mongoose.model('Channel', new mongoose.Schema({
+            name: String,
+            link: String,
+            stars: Number
+        }));
+        const channels = await Channel.find();
+        res.json(channels);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: 'Server error' });
     }
 });
 
-// Любой другой маршрут возвращает index.html
+// Отправка index.html на любой другой маршрут
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

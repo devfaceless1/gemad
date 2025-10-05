@@ -3,38 +3,52 @@
     const tg = tgWebApp;
     tg.expand();
 
+    // Telegram ID пользователя
+    window.telegramId = tg.initDataUnsafe?.user?.id;
+
     window.userBalance = 0;
     const starsBalanceEl = document.getElementById('stars-balance');
+
+    async function fetchBalance() {
+        if (!window.telegramId) return;
+        try {
+            const res = await fetch(`/api/user/${window.telegramId}`);
+            const data = await res.json();
+            window.userBalance = data.balance || 0;
+            updateBalanceUI();
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
     function updateBalanceUI() {
         if (starsBalanceEl) starsBalanceEl.textContent = `${window.userBalance} ⭐`;
     }
 
-    updateBalanceUI();
+    fetchBalance();
 
     const subscribedChannels = new Set();
 
-    // Контейнер для сообщений
-    let messageContainer = document.getElementById('telegram-messages');
-    if (!messageContainer) {
-        messageContainer = document.createElement('div');
-        messageContainer.id = 'telegram-messages';
-        document.body.appendChild(messageContainer);
-        Object.assign(messageContainer.style, {
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '10px',
-            pointerEvents: 'none',
-        });
-    }
-
     function showMessage(text, type = 'message', duration = 1500) {
+        let messageContainer = document.getElementById('telegram-messages');
+        if (!messageContainer) {
+            messageContainer = document.createElement('div');
+            messageContainer.id = 'telegram-messages';
+            document.body.appendChild(messageContainer);
+            Object.assign(messageContainer.style, {
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 9999,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '10px',
+                pointerEvents: 'none',
+            });
+        }
+
         const msg = document.createElement('div');
         msg.textContent = text;
         Object.assign(msg.style, {
@@ -52,7 +66,7 @@
 
     // Подписка на каналы
     document.querySelectorAll('.ad-link').forEach(link => {
-        link.addEventListener('click', (e) => {
+        link.addEventListener('click', async (e) => {
             e.preventDefault();
             const channelUrl = link.getAttribute('href');
             if (!channelUrl || channelUrl === '#') return;
@@ -65,12 +79,23 @@
             const starsMatch = link.textContent.match(/\d+(\.\d+)?/);
             const starsToAdd = starsMatch ? parseFloat(starsMatch[0]) : 0;
 
-            window.userBalance += starsToAdd;
+            // Обновляем баланс на сервере
+            if (window.telegramId) {
+                const res = await fetch(`/api/user/${window.telegramId}`);
+                const data = await res.json();
+                window.userBalance = (data.balance || 0) + starsToAdd;
+
+                await fetch('/api/user/spin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId: window.telegramId, cost: 0 })
+                });
+            }
+
             updateBalanceUI();
             subscribedChannels.add(channelUrl);
             showMessage(`You earned ${starsToAdd} ⭐!`, 'success');
 
-            // Открываем канал
             window.open(channelUrl, '_blank');
         });
     });
@@ -78,7 +103,6 @@
     // Отображение пользователя
     const user = tg.initDataUnsafe?.user;
     if (user) {
-        window.telegramId = user.id; // Сохраняем для API спина
         const nameEl = document.getElementById('name');
         if (nameEl) nameEl.textContent = user.first_name || 'User';
 
