@@ -74,7 +74,8 @@
             showMessage(`You earned ${starsToAdd} ⭐!`, 'success');
 
             // Открываем канал внутри Telegram
-            tg.openChat(channelUsername);
+            tg.openLink(`https://t.me/${channelUsername}`);
+
         });
     });
 
