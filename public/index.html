@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GemAd - Earn Telegram Stars!</title>
+  <link rel="stylesheet" href="/reset.css">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+    .page { display: none; }
+    .page.active { display: flex; }
+
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+  <div class="header__content">
+    <div class="user-info">
+      <div class="logo info-item">
+        <!-- Аватар пользователя Telegram -->
+        <img class="user-icon" id="avatar" src="" alt="avatar">
+      </div>
+      <div class="user-stat">
+        <!-- Имя пользователя -->
+        <div class="user-name info-item" id="name"></div>
+        <!-- Количество заработанных звезд (можно обновлять через JS) -->
+        <div class="stars-earned info-item" id="stars-earned"></div>
+      </div>
+    </div>
+    <div class="user-balance info-item">
+      <!-- Баланс звезд -->
+       <p class="stars-balance">Balance: <span id="stars-balance">0 ⭐</span></p>
+    </div>
+  </div>
+</header>
+
+  <!-- Main -->
+  <main>
+    <!-- Page 1 -->
+    <section id="page-ad" class="page active">
+      <div class="section-header">
+        <div class="section-header__content">
+          <div class="section-header__blocks">
+
+            <!-- block -->
+            <div class="ad-block">
+              <div class="ad-block__head">
+                <img class="ad-block__img" src="images/nazvakanalu.jpg" alt="item">
+              </div>
+              <div class="ad-block__bottom">
+                <div class="ad-block__text block-bottom__item">
+                  <div class="ad-block__title">Channel name</div>
+                </div>
+                <div class="ad-block__description">
+                  <div class="ad-block__desc block-bottom__item">Ishov 5 den bez sush</div>
+                    <a href="https://t.me/SonataStudio" class="ad-link ad-link__mobile block-bottom__item">Subscribe 14.88⭐</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- block -->
+            <div class="ad-block">
+              <div class="ad-block__head">
+                <img class="ad-block__img" src="images/durov.jpg" alt="item">
+              </div>
+              <div class="ad-block__bottom">
+                <div class="ad-block__text block-bottom__item">
+                  <div class="ad-block__title">Pavel Durov</div>
+                </div>
+                <div class="ad-block__description">
+                  <div class="ad-block__desc block-bottom__item">Official Telegram of Pavel Durov</div>
+                    <a href="#" class="ad-link ad-link__mobile block-bottom__item">Subscribe 15⭐</a>
+                </div>
+              </div>
+            </div>
+            <!-- block -->
+            <div class="ad-block">
+              <div class="ad-block__head">
+                <video autoplay muted loop playsinline class="ad-block__img" src="images/photo_2025-10-04_22-09-30.mp4"></video>
+              </div>
+              <div class="ad-block__bottom">
+                <div class="ad-block__text block-bottom__item">
+                  <div class="ad-block__title">Sonata Studio</div>
+                </div>
+                <div class="ad-block__description">
+                  <div class="ad-block__desc block-bottom__item">Create your own chat-bot right now</div>
+                    <a href="https://t.me/SonataStudio" class="ad-link ad-link__mobile block-bottom__item">Subscribe 15⭐</a>
+                </div>
+              </div>
+            </div>
+  
+
+            
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- cases -->
+    <section id="page-cases" class="page">
+  <div class="section-cases">
+    <div class="section-cases__content">
+      <div class="section-cases__blocks">
+
+        <a class="case-block" href="#" onclick="showPage('case-durov', event)">
+          <div class="case-block__head">
+            <img class="case-block__img" src="images/durov.jpg" alt="item">
+          </div>
+          <div class="case-block__bottom">
+            <h2 class="case-block__title">Durov's Case</h2>
+            <div class="case-block__desc">Try your luck and win stars!</div>
+            <div class="case-block__price">Price: 200 ⭐</div>
+          </div>
+        </a>
+
+        <a class="case-block" href="#" onclick="showPage('case-durov', event)">
+          <div class="case-block__head">
+            <img class="case-block__img" src="images/durov.jpg" alt="item">
+          </div>
+          <div class="case-block__bottom">
+            <h2 class="case-block__title">Durov's Case</h2>
+            <div class="case-block__desc">Try your luck and win stars!</div>
+            <div class="case-block__price">Price: 200 ⭐</div>
+          </div>
+        </a>
+
+        <a class="case-block" href="#" onclick="showPage('case-durov', event)">
+          <div class="case-block__head">
+            <img class="case-block__img" src="images/durov.jpg" alt="item">
+          </div>
+          <div class="case-block__bottom">
+            <h2 class="case-block__title">Durov's Case</h2>
+            <div class="case-block__desc">Try your luck and win stars!</div>
+            <div class="case-block__price">Price: 200 ⭐</div>
+          </div>
+        </a>
+
+        <a class="case-block" href="#" onclick="showPage('case-durov', event)">
+          <div class="case-block__head">
+            <img class="case-block__img" src="images/durov.jpg" alt="item">
+          </div>
+          <div class="case-block__bottom">
+            <h2 class="case-block__title">Durov's Case</h2>
+            <div class="case-block__desc">Try your luck and win stars!</div>
+            <div class="case-block__price">Price: 200 ⭐</div>
+          </div>
+        </a>
+
+      </div>
+
+      <a class="back-button" href="#" onclick="showPage('page-ad', event)">
+        <img style="width: 30px; height: 30px;" src="images/left-arrow.svg" alt="back">
+      </a>
+    </div>
+  </div>
+</section>
+
+
+    <section id="case-durov" class="page">
+      <div class="case-durov">
+      <h1 style="color: #fff; font-weight: 600; font-size: 18px;">Durov Case</h1>
+      <div class="viewport" id="viewport">
+    <div class="strip" id="strip"></div>
+    <div class="indicator" aria-hidden="true"></div>
+  </div>
+
+  <button class="spin-btn" id="spin">SPIN 200 ⭐</button>
+  <div id="result">Good Luck!</div>
+      <a class="back-button" href="#" onclick="showPage('page-cases', event)"> <img style="width: 30px; height: 30px;" src="images/left-arrow.svg" alt="back"> </a>
+      
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer">
+      <ul class="footer-nav">
+        <li class="footer-nav__item active">
+  <a href="#" onclick="showPage('page-ad', event)">Ad</a>
+</li>
+<li class="footer-nav__item">
+  <a href="#" onclick="showPage('page-cases', event)">Cases</a>
+</li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- tg + nav -->
+   <script src="spin.js"></script>
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.expand();
+
+  // nav
+  window.showPage = function(pageId, event) {
+    if (event) event.preventDefault();
+
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    const page = document.getElementById(pageId);
+    if (page) page.classList.add("active");
+
+    document.querySelectorAll(".footer-nav__item").forEach(i => i.classList.remove("active"));
+    const link = document.querySelector(`.footer-nav__item a[onclick*="${pageId}"]`);
+    if (link) link.parentElement.classList.add("active");
+
+    history.pushState({ page: pageId }, "", `#${pageId}`);
+  }
+
+
+  window.addEventListener("popstate", e => {
+    const page = e.state?.page || "page-ad";
+    window.showPage(page);
+  });
+
+</script>
+  <div id="telegram-messages"></div>
+
+
+  <script src="telegram.js"></script> 
+  <script src="spin.js"></script>
+</body>
+</html>
