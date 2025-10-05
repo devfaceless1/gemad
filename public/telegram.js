@@ -1,4 +1,4 @@
-(function () {
+(async function () {
     const tg = window.Telegram.WebApp;
     tg.expand();
 
@@ -6,6 +6,7 @@
     if (!user) throw new Error('Telegram user not found');
 
     const telegramId = user.id.toString();
+    window.telegramId = telegramId; // добавлено для spin.js
     const firstName = user.first_name;
     const username = user.username;
     const avatarUrl = user.photo_url || (user.username ? `https://t.me/i/userpic/320/${user.username}.jpg` : '');
@@ -19,6 +20,7 @@
     avatarEl.src = avatarUrl;
 
     window.userBalance = 0;
+    let subscribedChannels = new Set();
 
     // Инициализация пользователя
     async function initUser() {
@@ -30,24 +32,27 @@
         const data = await res.json();
         window.userBalance = data.balance || 0;
         starsBalanceEl.textContent = `${window.userBalance} ⭐`;
+
+        subscribedChannels = new Set(data.subscribedChannels || []);
     }
 
-    initUser();
+    await initUser();
 
     // Обновление баланса
-    async function updateBalance(delta) {
+    async function updateBalance(delta, channel) {
         const res = await fetch('/api/user/update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ telegramId, delta })
+            body: JSON.stringify({ telegramId, delta, channel })
         });
         const data = await res.json();
         window.userBalance = data.balance;
         starsBalanceEl.textContent = `${window.userBalance} ⭐`;
+
+        if (channel) subscribedChannels = new Set(data.subscribedChannels || []);
     }
 
     // Подписка на каналы
-    const subscribedChannels = new Set();
     document.querySelectorAll('.ad-link').forEach(link => {
         link.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -62,15 +67,14 @@
             const starsMatch = link.textContent.match(/\d+(\.\d+)?/);
             const starsToAdd = starsMatch ? parseFloat(starsMatch[0]) : 0;
 
-            await updateBalance(starsToAdd);
-            subscribedChannels.add(channelUrl);
+            await updateBalance(starsToAdd, channelUrl);
             showMessage(`You earned ${starsToAdd} ⭐!`, 'success');
 
             tg.openLink(channelUrl);
         });
     });
 
-    // Сообщения
+    // Сообщения (остался без изменений)
     let messageContainer = document.getElementById('telegram-messages');
     if (!messageContainer) {
         messageContainer = document.createElement('div');

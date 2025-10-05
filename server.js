@@ -24,7 +24,9 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ================================
 // Инициализация пользователя
+// ================================
 app.post('/api/user/init', async (req, res) => {
     const { telegramId, firstName, username, avatarUrl } = req.body;
     if (!telegramId) return res.status(400).json({ error: 'No telegramId' });
@@ -35,12 +37,15 @@ app.post('/api/user/init', async (req, res) => {
         await user.save();
     }
 
-    res.json({ balance: user.balance });
+    // Возвращаем баланс и подписанные каналы
+    res.json({ balance: user.balance, subscribedChannels: user.subscribedChannels });
 });
 
-// Обновление баланса
+// ================================
+// Обновление баланса и подписок
+// ================================
 app.post('/api/user/update', async (req, res) => {
-    const { telegramId, delta } = req.body;
+    const { telegramId, delta, channel } = req.body;
     if (!telegramId) return res.status(400).json({ error: 'No telegramId' });
 
     const user = await User.findOne({ telegramId });
@@ -48,16 +53,45 @@ app.post('/api/user/update', async (req, res) => {
 
     user.balance += delta;
     if (user.balance < 0) user.balance = 0;
+
+    // Добавляем канал, если он указан и еще не был подписан
+    if (channel && !user.subscribedChannels.includes(channel)) {
+        user.subscribedChannels.push(channel);
+    }
+
+    await user.save();
+
+    res.json({ balance: user.balance, subscribedChannels: user.subscribedChannels });
+});
+
+// ================================
+// Маршрут для кейса / спина
+// ================================
+app.post('/api/user/spin', async (req, res) => {
+    const { telegramId, cost } = req.body;
+    if (!telegramId) return res.status(400).json({ error: 'No telegramId' });
+
+    const user = await User.findOne({ telegramId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (user.balance < cost) return res.status(400).json({ error: 'Not enough stars' });
+
+    user.balance -= cost;
     await user.save();
 
     res.json({ balance: user.balance });
 });
 
-// Отправка index.html на любой другой маршрут
+// ================================
+// Любой другой маршрут возвращает index.html
+// ================================
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ================================
+// Запуск сервера
+// ================================
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

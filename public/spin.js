@@ -18,10 +18,11 @@ const btn = document.getElementById('spin');
 const resultEl = document.getElementById('result');
 let totalItems = PRIZES.length * REPEAT;
 
+// Построение полоски с призами
 function buildStrip() {
   strip.innerHTML = '';
-  for(let r = 0; r < REPEAT; r++) {
-    for(const p of PRIZES) {
+  for (let r = 0; r < REPEAT; r++) {
+    for (const p of PRIZES) {
       const el = document.createElement('div');
       el.className = 'item';
       const img = document.createElement('img');
@@ -40,36 +41,55 @@ function buildStrip() {
 }
 buildStrip();
 
+// Выбор приза с учетом веса
 function weightedChoice(list) {
   const total = list.reduce((s, a) => s + Math.max(0, a.weight || 0), 0);
-  if(total <= 0) return null;
+  if (total <= 0) return null;
   let r = Math.random() * total, acc = 0;
-  for(let i=0;i<list.length;i++){
+  for (let i = 0; i < list.length; i++) {
     acc += list[i].weight;
-    if(r < acc) return i;
+    if (r < acc) return i;
   }
   return list.length - 1;
 }
 
+// Анимация easing
 function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
 btn.addEventListener('click', async () => {
-  if(btn.disabled) return;
-  if(window.userBalance < 200) { resultEl.textContent = 'Not enough stars to spin!'; return; }
+  if (btn.disabled) return;
+  btn.disabled = true;
 
-  // списание через сервер
+  if (window.userBalance < 200) {
+    resultEl.textContent = 'Not enough stars to spin!';
+    btn.disabled = false;
+    return;
+  }
+
+  // Списание звезд через сервер
   const res = await fetch("/api/user/spin", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ telegramId: window.telegramId, cost: 200 })
   });
+
   const data = await res.json();
-  if(data.error) { resultEl.textContent = data.error; return; }
+  if (data.error) {
+    resultEl.textContent = data.error;
+    btn.disabled = false;
+    return;
+  }
+
   window.userBalance = data.balance;
   document.getElementById('stars-balance').textContent = `${window.userBalance} ⭐`;
 
+  // Выбор приза
   const choice = weightedChoice(PRIZES);
-  if(choice === null) { resultEl.textContent = 'Error: no prizes'; return; }
+  if (choice === null) { 
+    resultEl.textContent = 'Error: no prizes'; 
+    btn.disabled = false;
+    return; 
+  }
 
   const from = parseFloat(strip.dataset.x || '0');
   const vpCenter = viewport.clientWidth / 2;
@@ -78,25 +98,33 @@ btn.addEventListener('click', async () => {
   let targetRepeat = baseRepeat + BASE_ROTATIONS + 1;
   let targetIndex = targetRepeat * PRIZES.length + choice;
   const maxSafeIndex = totalItems - PRIZES.length - 1;
-  if(targetIndex > maxSafeIndex){
-    targetRepeat = Math.floor(REPEAT/2);
-    targetIndex = targetRepeat*PRIZES.length + choice;
-    if(targetIndex <= currentCenterIndex){ targetIndex = Math.min(maxSafeIndex, currentCenterIndex + PRIZES.length); }
+
+  if (targetIndex > maxSafeIndex) {
+    targetRepeat = Math.floor(REPEAT / 2);
+    targetIndex = targetRepeat * PRIZES.length + choice;
+    if (targetIndex <= currentCenterIndex) {
+      targetIndex = Math.min(maxSafeIndex, currentCenterIndex + PRIZES.length);
+    }
   }
 
-  const elementX = targetIndex*FULL_W;
-  const targetTranslate = vpCenter - elementX - (ITEM_WIDTH/2);
+  const elementX = targetIndex * FULL_W;
+  const targetTranslate = vpCenter - elementX - (ITEM_WIDTH / 2);
   let final = targetTranslate;
-  if(Math.abs(final - from) < 0.5){ const loopW = PRIZES.length*FULL_W; final -= loopW*(1 + Math.floor(Math.random()*3)); }
+  if (Math.abs(final - from) < 0.5) {
+    const loopW = PRIZES.length * FULL_W;
+    final -= loopW * (1 + Math.floor(Math.random() * 3));
+  }
 
+  // Анимация спина
   const start = performance.now();
-  function raf(now){
-    const t = Math.min(1,(now-start)/DURATION);
+  function raf(now) {
+    const t = Math.min(1, (now - start) / DURATION);
     const eased = easeOutCubic(t);
-    const cur = from + (final-from)*eased;
+    const cur = from + (final - from) * eased;
     strip.style.transform = `translateX(${cur}px)`;
-    if(t<1) requestAnimationFrame(raf);
-    else{
+
+    if (t < 1) requestAnimationFrame(raf);
+    else {
       strip.style.transform = `translateX(${final}px)`;
       strip.dataset.x = String(final);
       const prize = PRIZES[choice];
