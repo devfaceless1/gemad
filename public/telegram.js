@@ -1,6 +1,10 @@
 (function () {
     const tg = window.Telegram.WebApp;
+    tg.ready();
     tg.expand();
+
+    // Если клиент поддерживает полноэкранный режим — активируем его
+    if (tg.requestFullscreen) tg.requestFullscreen();
 
     const user = tg.initDataUnsafe?.user;
     if (!user) throw new Error('Telegram user not found');
@@ -10,9 +14,11 @@
     const username = user.username;
     const avatarUrl = user.photo_url || (user.username ? `https://t.me/i/userpic/320/${user.username}.jpg` : '');
 
+    // Глобальные переменные
     window.telegramId = telegramId;
+    window.userBalance = 0;
 
-    // Элементы UI
+    // UI элементы
     const starsBalanceEl = document.getElementById('stars-balance');
     const starsEarnedEl = document.getElementById('stars-earned');
     const nameEl = document.getElementById('name');
@@ -21,10 +27,7 @@
     nameEl.textContent = firstName;
     avatarEl.src = avatarUrl;
 
-    window.userBalance = 0;
-    window.totalEarned = 0;
-
-    // --- Инициализация пользователя ---
+    // Инициализация пользователя
     async function initUser() {
         const res = await fetch('/api/user/init', {
             method: 'POST',
@@ -32,19 +35,16 @@
             body: JSON.stringify({ telegramId, firstName, username, avatarUrl })
         });
         const data = await res.json();
-
         window.userBalance = data.balance || 0;
-        window.totalEarned = data.totalEarned || 0;
-
         starsBalanceEl.textContent = `${window.userBalance} ⭐`;
-        starsEarnedEl.textContent = `Earned: ${window.totalEarned} ⭐`;
+        starsEarnedEl.textContent = `Earned: ${data.totalEarned || 0} ⭐`;
 
         window.subscribedChannels = new Set(data.subscribedChannels || []);
     }
 
     initUser();
 
-    // --- Обновление баланса ---
+    // Обновление баланса
     async function updateBalance(delta, channelUsername = null) {
         const res = await fetch('/api/user/update', {
             method: 'POST',
@@ -52,17 +52,13 @@
             body: JSON.stringify({ telegramId, delta, channel: channelUsername })
         });
         const data = await res.json();
-
         window.userBalance = data.balance;
-        window.totalEarned = data.totalEarned || window.totalEarned;
-
         starsBalanceEl.textContent = `${window.userBalance} ⭐`;
-        starsEarnedEl.textContent = `Earned: ${window.totalEarned} ⭐`;
-
+        starsEarnedEl.textContent = `Earned: ${data.totalEarned || 0} ⭐`;
         if (channelUsername) window.subscribedChannels.add(channelUsername);
     }
 
-    // --- Подписка на каналы ---
+    // Подписка на каналы
     document.querySelectorAll('.ad-link').forEach(link => {
         link.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -86,7 +82,7 @@
         });
     });
 
-    // --- Сообщения ---
+    // Сообщения (тосты)
     let messageContainer = document.getElementById('telegram-messages');
     if (!messageContainer) {
         messageContainer = document.createElement('div');
@@ -107,27 +103,23 @@
     }
 
     let isMessageActive = false;
-
     function showMessage(text, type = 'message', duration = 2000) {
         if (isMessageActive) return;
         isMessageActive = true;
 
         const msg = document.createElement('div');
         msg.textContent = text;
-        let bgColor = '#2196f3';
-        if (type === 'success') bgColor = '#4caf50';
-        if (type === 'error') bgColor = '#e53935';
 
+        const bg = type === 'success' ? '#4caf50' : type === 'error' ? '#e53935' : '#2196f3';
         Object.assign(msg.style, {
             padding: '14px 24px',
-            background: bgColor,
+            background: bg,
             color: '#fff',
             borderRadius: '12px',
             fontWeight: '600',
-            fontSize: '15px',
             textAlign: 'center',
-            minWidth: '220px',
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.25)',
+            fontSize: '15px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
             opacity: '0',
             transform: 'translateY(20px)',
             transition: 'opacity 0.3s ease, transform 0.3s ease',
