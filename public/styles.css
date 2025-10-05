@@ -117,6 +117,7 @@ html{
     margin-top: 10px;
     font-size: 14px;
     color: #bbb;
+    min-height: 28px;
 }
 
 .ad-block__price {
