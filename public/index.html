@@ -244,15 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   tg.expand();
 
-  // --- фиксируем футер
-  footer.style.position = 'fixed';
-  footer.style.left = '0';
-  footer.style.right = '0';
-  footer.style.bottom = '0';
-  footer.style.zIndex = '100';
-  main.style.paddingBottom = '70px';
 
-  // --- собираем хэштеги
   let hashtags = [];
   adBlocks.forEach(block => {
     const tagsAttr = block.dataset.tag || '';
@@ -263,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   hashtags = [...new Set(hashtags)];
 
-  // --- ввод поиска
+
   searchInput.addEventListener('input', () => {
     const query = searchInput.value.trim().toLowerCase();
     suggestionsList.innerHTML = '';
@@ -289,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
       suggestionsList.style.display = 'none';
     }
 
-    // --- фильтруем блоки и подсвечиваем хэштеги
+
     let found = 0;
     adBlocks.forEach(block => {
       const tagsAttr = block.dataset.tag || '';
@@ -310,14 +302,14 @@ document.addEventListener('DOMContentLoaded', () => {
     noResults.style.display = (found === 0 && query !== '') ? 'block' : 'none';
   });
 
-  // --- скрываем подсказки при клике вне поля
+
   document.addEventListener('click', e => {
     if (!e.target.closest('.search-container')) {
       suggestionsList.style.display = 'none';
     }
   });
 
-  // --- при фокусе скрываем футер (исправляем прыжок)
+
   searchInput.addEventListener('focus', () => {
     tg.expand();
     footer.style.display = 'none';
@@ -330,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 200);
   });
 
-  // --- на всякий случай корректируем футер при изменении высоты окна
+
   tg.onEvent('viewportChanged', () => {
     footer.style.bottom = '0';
   });

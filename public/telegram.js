@@ -12,7 +12,7 @@
 
     window.telegramId = telegramId;
 
-    // Элементы UI
+
     const starsBalanceEl = document.getElementById('stars-balance');
     const starsEarnedEl = document.getElementById('stars-earned');
     const nameEl = document.getElementById('name');
@@ -24,7 +24,7 @@
     window.userBalance = 0;
     window.totalEarned = 0;
 
-    // --- Инициализация пользователя ---
+
     async function initUser() {
         const res = await fetch('/api/user/init', {
             method: 'POST',
@@ -44,7 +44,7 @@
 
     initUser();
 
-    // --- Обновление баланса ---
+ 
     async function updateBalance(delta, channelUsername = null) {
         const res = await fetch('/api/user/update', {
             method: 'POST',
@@ -62,7 +62,6 @@
         if (channelUsername) window.subscribedChannels.add(channelUsername);
     }
 
-    // --- Подписка на каналы ---
     document.querySelectorAll('.ad-link').forEach(link => {
         link.addEventListener('click', async (e) => {
             e.preventDefault();

@@ -85,7 +85,7 @@ html{
     margin-bottom: 85px;
 }
 
-/* ================== AD как CASE ================== */
+/* ================== CASE ================== */
 .section-header__blocks {
     display: grid;
     grid-template-columns: auto auto auto;
@@ -193,8 +193,8 @@ header {
 }
 
 main {
-    padding-top: 60px;   /* высота header */
-    padding-bottom: 15px; /* высота footer */
+    padding-top: 60px;   
+    padding-bottom: 15px; 
     position: relative;
 }
 
@@ -455,8 +455,8 @@ main {
   background: #1e2533;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  overflow-y: auto;       /* Прокрутка по вертикали */
-  max-height: 200px;      /* Фиксированная высота блока подсказок */
+  overflow-y: auto;       
+  max-height: 200px;     
   display: none;
   z-index: 10;
   list-style: none;
@@ -469,7 +469,7 @@ main {
   color: #fff;
   cursor: pointer;
   transition: background 0.2s;
-  white-space: nowrap;    /* Чтобы текст не переносился */
+  white-space: nowrap;  
 }
 
 .suggestions li:hover {

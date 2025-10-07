@@ -18,7 +18,7 @@ const btn = document.getElementById('spin');
 const resultEl = document.getElementById('result');
 let totalItems = PRIZES.length * REPEAT;
 
-// Построение полоски с призами
+
 function buildStrip() {
   strip.innerHTML = '';
   for (let r = 0; r < REPEAT; r++) {
@@ -41,7 +41,6 @@ function buildStrip() {
 }
 buildStrip();
 
-// Выбор приза с учетом веса
 function weightedChoice(list) {
   const total = list.reduce((s, a) => s + Math.max(0, a.weight || 0), 0);
   if (total <= 0) return null;
@@ -53,7 +52,7 @@ function weightedChoice(list) {
   return list.length - 1;
 }
 
-// Анимация easing
+
 function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
 btn.addEventListener('click', async () => {
@@ -66,7 +65,7 @@ btn.addEventListener('click', async () => {
     return;
   }
 
-  // Списание звезд через сервер
+
   const res = await fetch("/api/user/spin", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

@@ -13,7 +13,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Подключение к MongoDB
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -24,9 +23,7 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ================================
-// Инициализация пользователя
-// ================================
+
 app.post('/api/user/init', async (req, res) => {
     const { telegramId, firstName, username, avatarUrl } = req.body;
     if (!telegramId) return res.status(400).json({ error: 'No telegramId' });
@@ -39,13 +36,13 @@ app.post('/api/user/init', async (req, res) => {
             username,
             avatarUrl,
             balance: 0,
-            totalEarned: 0, // 💰 добавляем поле при создании
+            totalEarned: 0, 
             subscribedChannels: []
         });
         await user.save();
     }
 
-    // Возвращаем баланс, totalEarned и подписанные каналы
+
     res.json({
         balance: user.balance,
         totalEarned: user.totalEarned || 0,
@@ -53,9 +50,7 @@ app.post('/api/user/init', async (req, res) => {
     });
 });
 
-// ================================
-// Обновление баланса и подписок
-// ================================
+
 app.post('/api/user/update', async (req, res) => {
     const { telegramId, delta, channel } = req.body;
     if (!telegramId) return res.status(400).json({ error: 'No telegramId' });
@@ -63,17 +58,17 @@ app.post('/api/user/update', async (req, res) => {
     const user = await User.findOne({ telegramId });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Обновляем баланс
+
     user.balance += delta;
 
-    // 💰 добавляем в totalEarned, если delta положительная
+
     if (delta > 0) {
         user.totalEarned = (user.totalEarned || 0) + delta;
     }
 
     if (user.balance < 0) user.balance = 0;
 
-    // Добавляем канал, если он указан и ещё не был подписан
+
     if (channel && !user.subscribedChannels.includes(channel)) {
         user.subscribedChannels.push(channel);
     }
@@ -87,9 +82,7 @@ app.post('/api/user/update', async (req, res) => {
     });
 });
 
-// ================================
-// Кейсы / спин
-// ================================
+
 app.post('/api/user/spin', async (req, res) => {
     const { telegramId, cost } = req.body;
     if (!telegramId) return res.status(400).json({ error: 'No telegramId' });
@@ -108,9 +101,7 @@ app.post('/api/user/spin', async (req, res) => {
     });
 });
 
-// ================================
-// Админ: сброс баланса (опционально)
-// ================================
+
 app.post('/api/admin/reset-balances', async (req, res) => {
     const secret = req.headers['x-admin-secret'] || req.body.secret;
     if (!secret || secret !== process.env.ADMIN_SECRET) return res.status(403).json({ error: 'Forbidden' });
@@ -119,16 +110,12 @@ app.post('/api/admin/reset-balances', async (req, res) => {
     res.json({ ok: true, modifiedCount: result.modifiedCount ?? result.nModified ?? result });
 });
 
-// ================================
-// Любой другой маршрут возвращает index.html
-// ================================
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ================================
-// Запуск сервера
-// ================================
+
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
