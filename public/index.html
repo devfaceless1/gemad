@@ -232,6 +232,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const suggestionsList = document.getElementById('suggestionsList');
   const adBlocks = document.querySelectorAll('.ad-block');
   const noResults = document.getElementById('noResults');
+  const footer = document.querySelector('footer');
+  const tg = window.Telegram.WebApp;
+
+  // --- фиксируем футер и добавляем паддинг для контента
+  footer.style.position = 'fixed';
+  footer.style.left = '0';
+  footer.style.right = '0';
+  footer.style.bottom = '0';
+  footer.style.zIndex = '100';
+  document.querySelector('main').style.paddingBottom = '70px'; // высота футера
 
   // --- собираем все хэштеги
   let hashtags = [];
@@ -249,6 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const query = searchInput.value.trim().toLowerCase();
     suggestionsList.innerHTML = '';
 
+    // --- фильтруем подсказки
     if (query) {
       const filtered = hashtags.filter(tag => tag.toLowerCase().includes(query));
       if (filtered.length) {
@@ -270,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
       suggestionsList.style.display = 'none';
     }
 
-    // --- фильтруем блоки и подсвечиваем найденный хэштег
+    // --- фильтруем блоки и подсвечиваем хэштеги
     let found = 0;
     adBlocks.forEach(block => {
       const tagsAttr = block.dataset.tag || '';
@@ -280,13 +291,11 @@ document.addEventListener('DOMContentLoaded', () => {
       block.style.display = matches ? '' : 'none';
       if (matches) found++;
 
-      // --- подсветка хэштегов на блоке
-      block.querySelectorAll('.ad-block__hashtag').forEach(el => {
-        const tagText = el.textContent.toLowerCase();
-        if (query && tagText.includes(query)) {
-          el.classList.add('highlight');
-        } else {
-          el.classList.remove('highlight');
+      // --- подсветка хэштега
+      block.querySelectorAll('.ad-block__hashtag').forEach(h => {
+        h.classList.remove('highlight');
+        if (query && h.textContent.toLowerCase().includes(query)) {
+          h.classList.add('highlight');
         }
       });
     });
@@ -303,8 +312,17 @@ document.addEventListener('DOMContentLoaded', () => {
       suggestionsList.style.display = 'none';
     }
   });
-});
 
+  // --- расширяем WebApp при фокусе на input (чтобы футер не прыгал)
+  searchInput.addEventListener('focus', () => tg.expand());
+
+  // --- динамическая корректировка футера при изменении видимой области
+  tg.onEvent('viewportChanged', () => {
+    const vh = tg.viewportHeight; // видимая высота
+    const stable = tg.viewportStableHeight; // стабильная высота
+    footer.style.bottom = `${stable - vh}px`;
+  });
+});
 </script>
 
   <div id="telegram-messages"></div>
