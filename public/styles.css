@@ -197,8 +197,11 @@ main {
     padding-top: 60px;   /* высота header */
     padding-bottom: 15px; /* высота footer */
     position: relative;
+    transition: padding-bottom 180ms ease;
 }
-
+footer {
+  transition: transform 180ms ease;
+}
 
 /* Cases */
 
