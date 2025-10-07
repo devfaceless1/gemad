@@ -228,38 +228,46 @@
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  const tg = window.Telegram?.WebApp || null;
+  // элементы
   const searchInput = document.getElementById('searchInput');
   const suggestionsList = document.getElementById('suggestionsList');
   const adBlocks = document.querySelectorAll('.ad-block');
   const noResults = document.getElementById('noResults');
   const footer = document.querySelector('footer');
-  const tg = window.Telegram.WebApp;
+  const main = document.querySelector('main');
 
-  // --- фиксируем футер и добавляем паддинг для контента
-  footer.style.position = 'fixed';
-  footer.style.left = '0';
-  footer.style.right = '0';
-  footer.style.bottom = '0';
-  footer.style.zIndex = '100';
-  document.querySelector('main').style.paddingBottom = '70px'; // высота футера
+  // безопасные стили для плавного движения футера
+  if (footer) {
+    footer.style.position = 'fixed';
+    footer.style.left = '0';
+    footer.style.right = '0';
+    footer.style.bottom = '0';
+    footer.style.zIndex = '100';
+    footer.style.transition = 'transform 180ms ease';
+    footer.style.willChange = 'transform';
+  }
+  if (main) {
+    main.style.transition = 'padding-bottom 180ms ease';
+    main.style.paddingBottom = `${footer ? footer.offsetHeight : 70}px`;
+  }
 
-  // --- собираем все хэштеги
+  // --- собираем все хэштеги (используем data-tag как у тебя)
   let hashtags = [];
   adBlocks.forEach(block => {
-    const tagsAttr = block.dataset.tag || '';
-    const tags = tagsAttr.split(' ')
-      .map(t => t.trim())
-      .filter(t => t.startsWith('#') && t.length > 1);
+    const tagsAttr = (block.dataset.tag || '').trim();
+    if (!tagsAttr) return;
+    const tags = tagsAttr.split(/\s+/).map(t => t.trim()).filter(t => t.startsWith('#') && t.length > 1);
     hashtags.push(...tags);
   });
-  hashtags = Array.from(new Set(hashtags)); // убираем дубликаты
+  hashtags = Array.from(new Set(hashtags));
 
-  // --- обработчик ввода
-  searchInput.addEventListener('input', () => {
-    const query = searchInput.value.trim().toLowerCase();
+  // --- функция поиска + подсказки + подсветка
+  function runSearch() {
+    const query = (searchInput.value || '').trim().toLowerCase();
     suggestionsList.innerHTML = '';
 
-    // --- фильтруем подсказки
+    // подсказки
     if (query) {
       const filtered = hashtags.filter(tag => tag.toLowerCase().includes(query));
       if (filtered.length) {
@@ -269,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
           li.addEventListener('click', () => {
             searchInput.value = tag;
             suggestionsList.style.display = 'none';
-            searchInput.dispatchEvent(new Event('input'));
+            runSearch(); // сразу применяем
           });
           suggestionsList.appendChild(li);
         });
@@ -281,47 +289,90 @@ document.addEventListener('DOMContentLoaded', () => {
       suggestionsList.style.display = 'none';
     }
 
-    // --- фильтруем блоки и подсвечиваем хэштеги
+    // фильтрация блоков и подсветка хэштегов
     let found = 0;
     adBlocks.forEach(block => {
-      const tagsAttr = block.dataset.tag || '';
-      const tags = tagsAttr.split(' ').map(t => t.trim().toLowerCase());
+      const tagsAttr = (block.dataset.tag || '').trim();
+      const tags = tagsAttr ? tagsAttr.split(/\s+/).map(t => t.trim().toLowerCase()) : [];
       const title = block.querySelector('.ad-block__title')?.textContent.toLowerCase() || '';
-      const matches = tags.some(tag => tag.includes(query)) || title.includes(query) || query === '';
+
+      const matches = query === '' || tags.some(tag => tag.includes(query)) || title.includes(query);
       block.style.display = matches ? '' : 'none';
       if (matches) found++;
 
-      // --- подсветка хэштега
+      // подсветка хэштегов внутри блока
       block.querySelectorAll('.ad-block__hashtag').forEach(h => {
-        h.classList.remove('highlight');
         if (query && h.textContent.toLowerCase().includes(query)) {
           h.classList.add('highlight');
+        } else {
+          h.classList.remove('highlight');
         }
       });
     });
 
-    // --- сообщение "ничего не найдено"
+    // сообщение "ничего не найдено"
     if (noResults) {
       noResults.style.display = (found === 0 && query !== '') ? 'block' : 'none';
     }
+  }
+
+  // навешиваем обработчики
+  searchInput.addEventListener('input', runSearch);
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-container')) suggestionsList.style.display = 'none';
   });
 
-  // --- скрываем подсказки при клике вне поля
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.search-container')) {
-      suggestionsList.style.display = 'none';
+  // --- Корректировка футера при открытии/закрытии клавиатуры ---
+  function adjustFooterForKeyboard() {
+    if (!footer) return;
+
+    // stable viewport (если Telegram предоставляет) или полная высота окна
+    const stable = (tg && typeof tg.viewportStableHeight === 'number' && tg.viewportStableHeight > 0)
+      ? tg.viewportStableHeight
+      : window.innerHeight;
+
+    // видимая высота: предпочитаем Telegram API, затем visualViewport, затем innerHeight
+    const visible = (tg && typeof tg.viewportHeight === 'number' && tg.viewportHeight > 0)
+      ? tg.viewportHeight
+      : (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
+
+    const keyboardHeight = Math.max(0, stable - visible);
+
+    // Если клавиатура видна (keyboardHeight > 0) — прячем футер под клавиатуру,
+    // иначе возвращаем футер на место.
+    if (keyboardHeight > 0) {
+      // перемещаем футер вниз (скрываем)
+      footer.style.transform = `translateY(${keyboardHeight}px)`;
+      // уменьшаем паддинг основного контента (чтобы контент не "подпрыгивал")
+      if (main) main.style.paddingBottom = `0px`;
+    } else {
+      footer.style.transform = '';
+      if (main) main.style.paddingBottom = `${footer.offsetHeight}px`;
     }
-  });
+  }
 
-  // --- расширяем WebApp при фокусе на input (чтобы футер не прыгал)
-  searchInput.addEventListener('focus', () => tg.expand());
+  // подключаем слушатели для разных платформ
+  if (tg && typeof tg.onEvent === 'function') {
+    try { tg.onEvent('viewportChanged', adjustFooterForKeyboard); } catch (e) { /* ignore */ }
+  }
+  // fallbackы
+  window.addEventListener('resize', adjustFooterForKeyboard);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', adjustFooterForKeyboard);
 
-  // --- динамическая корректировка футера при изменении видимой области
-  tg.onEvent('viewportChanged', () => {
-    const vh = tg.viewportHeight; // видимая высота
-    const stable = tg.viewportStableHeight; // стабильная высота
-    footer.style.bottom = `${stable - vh}px`;
+  // при фокусе на поле — просим Telegram развернуть WebApp и подправляем положение
+  searchInput.addEventListener('focus', () => {
+    if (tg && typeof tg.expand === 'function') try { tg.expand(); } catch(e) {}
+    // небольшой таймаут — чтобы браузер успел открыть клавиатуру
+    setTimeout(adjustFooterForKeyboard, 120);
   });
+  // при блюре — подправляем
+  searchInput.addEventListener('blur', () => setTimeout(adjustFooterForKeyboard, 120));
+
+  // начальная корректировка
+  setTimeout(() => {
+    runSearch();
+    adjustFooterForKeyboard();
+  }, 80);
 });
 </script>
 
