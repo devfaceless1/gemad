@@ -31,7 +31,7 @@
     </div>
     <div class="user-balance info-item">
 
-       <p class="stars-balance">Balance: <span id="stars-balance">0 ⭐</span></p>
+       <p class="stars-balance"> <span id="stars-balance">0 ⭐</span></p>
     </div>
   </div>
 </header>
@@ -41,10 +41,15 @@
       <div class="section-header">
         <div class="section-header__content">
           <h1 class="section__title">All available ads: </h1>
+          <div class="search-container">
+            <input id="searchInput" type="text" placeholder="Search by hashtag... (#fun, #crypto)" autocomplete="off"/>
+            <ul id="suggestionsList" class="suggestions"></ul>
+          </div>
+          <p id="noResults" class="no-results">Nothing found 😕 Try another hashtag</p>
           <div class="section-header__blocks">
 
             <!-- block -->
-            <div class="ad-block">
+            <div class="ad-block" data-tag="#food #syrok #recommended">
               <div class="ad-block__head">
                 <img class="ad-block__img" src="images/nazvakanalu.jpg" alt="item">
               </div>
@@ -54,13 +59,23 @@
                 
                 <div class="ad-block__description">
                   <div class="ad-block__desc block-bottom__item">Ishov 5 den bez sush</div>
+                  <div class="ad-block__hashtags">
+                  <div class="hashtag-recommended">#recomended</div>
+                  <div class="ad-block__hashtag">#food</div> 
+                  <div class="ad-block__hashtag">#syrok</div>
+                  
+                  </div>
                     <a href="https://t.me/miy_bloh" class="ad-link ad-link__mobile block-bottom__item">Subscribe 14 ⭐</a>
                 </div>
               </div>
             </div>
 
+
+
+
+          
             <!-- block -->
-            <div class="ad-block">
+            <div class="ad-block" data-tag="#father #business #pavel">
               <div class="ad-block__head">
                 <img class="ad-block__img" src="images/durov.jpg" alt="item">
               </div>
@@ -70,12 +85,17 @@
                 
                 <div class="ad-block__description">
                   <div class="ad-block__desc block-bottom__item">Official Telegram of Pavel Durov</div>
+                  <div class="ad-block__hashtags">
+                  <div class="ad-block__hashtag">#business</div> 
+                  <div class="ad-block__hashtag">#father</div>
+                  <div class="ad-block__hashtag">#pavel</div>
+                  </div>
                     <a href="https://t.me/durov" class="ad-link ad-link__mobile block-bottom__item">Subscribe 15⭐</a>
                 </div>
               </div>
             </div>
             <!-- block -->
-            <div class="ad-block">
+            <div class="ad-block" data-tag="#dev #chat-bots #devtools">
               <div class="ad-block__head">
                 <video autoplay muted loop playsinline class="ad-block__img" src="images/photo_2025-10-04_22-09-30.mp4"></video>
               </div>
@@ -85,12 +105,17 @@
                 
                 <div class="ad-block__description">
                   <div class="ad-block__desc block-bottom__item">Create your own chat-bot right now</div>
+                  <div class="ad-block__hashtags">
+                  <div class="ad-block__hashtag">#dev</div> 
+                  <div class="ad-block__hashtag">#chat-bots</div>
+                  <div class="ad-block__hashtag">#dev-tools</div>
+                  </div>
                     <a href="https://t.me/SonataStudio" class="ad-link ad-link__mobile block-bottom__item">Subscribe 15⭐</a>
                 </div>
               </div>
             </div>
             <!-- block -->
-            <div class="ad-block">
+            <div class="ad-block " data-tag="#fun #monkeys #bros">
               <div class="ad-block__head">
                 <img class="ad-block__img" src="images/monkeys.jpg" alt="item">
               </div>
@@ -100,6 +125,11 @@
                 
                 <div class="ad-block__description">
                   <div class="ad-block__desc block-bottom__item">Monkeyss</div>
+                  <div class="ad-block__hashtags">
+                  <div class="ad-block__hashtag">#monkeys</div> 
+                  <div class="ad-block__hashtag">#fun</div>
+                  <div class="ad-block__hashtag">#bros</div>
+                  </div>
                     <a href="https://t.me/bibizyankimonk" class="ad-link ad-link__mobile block-bottom__item">Subscribe 1500⭐</a>
                 </div>
               </div>
@@ -115,7 +145,7 @@
   <div class="section-cases">
     <div class="section-cases__content">
       <h1 class="section__title">Cases: </h1>
-      <div class="section-cases__blocks">
+      <div class="section-cases__blocks"> 
 
         <a class="case-block" href="#" onclick="showPage('case-durov', event)">
           <div class="case-block__head">
@@ -196,6 +226,87 @@
   });
 
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('searchInput');
+  const suggestionsList = document.getElementById('suggestionsList');
+  const adBlocks = document.querySelectorAll('.ad-block');
+  const noResults = document.getElementById('noResults');
+
+  // --- собираем все хэштеги
+  let hashtags = [];
+  adBlocks.forEach(block => {
+    const tagsAttr = block.dataset.tag || '';
+    const tags = tagsAttr.split(' ')
+      .map(t => t.trim())
+      .filter(t => t.startsWith('#') && t.length > 1);
+    hashtags.push(...tags);
+  });
+  hashtags = Array.from(new Set(hashtags)); // убираем дубликаты
+
+  // --- обработчик ввода
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    suggestionsList.innerHTML = '';
+
+    if (query) {
+      const filtered = hashtags.filter(tag => tag.toLowerCase().includes(query));
+      if (filtered.length) {
+        filtered.forEach(tag => {
+          const li = document.createElement('li');
+          li.textContent = tag;
+          li.addEventListener('click', () => {
+            searchInput.value = tag;
+            suggestionsList.style.display = 'none';
+            searchInput.dispatchEvent(new Event('input'));
+          });
+          suggestionsList.appendChild(li);
+        });
+        suggestionsList.style.display = 'block';
+      } else {
+        suggestionsList.style.display = 'none';
+      }
+    } else {
+      suggestionsList.style.display = 'none';
+    }
+
+    // --- фильтруем блоки и подсвечиваем найденный хэштег
+    let found = 0;
+    adBlocks.forEach(block => {
+      const tagsAttr = block.dataset.tag || '';
+      const tags = tagsAttr.split(' ').map(t => t.trim().toLowerCase());
+      const title = block.querySelector('.ad-block__title')?.textContent.toLowerCase() || '';
+      const matches = tags.some(tag => tag.includes(query)) || title.includes(query) || query === '';
+      block.style.display = matches ? '' : 'none';
+      if (matches) found++;
+
+      // --- подсветка хэштегов на блоке
+      block.querySelectorAll('.ad-block__hashtag').forEach(el => {
+        const tagText = el.textContent.toLowerCase();
+        if (query && tagText.includes(query)) {
+          el.classList.add('highlight');
+        } else {
+          el.classList.remove('highlight');
+        }
+      });
+    });
+
+    // --- сообщение "ничего не найдено"
+    if (noResults) {
+      noResults.style.display = (found === 0 && query !== '') ? 'block' : 'none';
+    }
+  });
+
+  // --- скрываем подсказки при клике вне поля
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-container')) {
+      suggestionsList.style.display = 'none';
+    }
+  });
+});
+
+</script>
+
   <div id="telegram-messages"></div>
 
 

@@ -421,6 +421,113 @@ main {
     
 }
 
+/* SEARCH */
+
+.search-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+#searchInput {
+  width: 90%;
+  max-width: 400px;
+  padding: 10px 15px;
+  border-radius: 10px;
+  border: none;
+  background: #1e2533;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+}
+
+#searchInput::placeholder {
+  color: #888;
+}
+
+.suggestions {
+  position: absolute;
+  top: 45px;
+  width: 90%;
+  max-width: 400px;
+  background: #1e2533;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  overflow-y: auto;       /* Прокрутка по вертикали */
+  max-height: 200px;      /* Фиксированная высота блока подсказок */
+  display: none;
+  z-index: 10;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.suggestions li {
+  padding: 10px 15px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;    /* Чтобы текст не переносился */
+}
+
+.suggestions li:hover {
+  background: #2a3549;
+}
+
+
+
+
+
+.ad-block__hashtag.highlight {
+  background-color: #53617a; 
+  box-shadow: 0 0 10px #53617a;
+
+}
+
+.no-results {
+  display: none;
+  text-align: center;
+  color: #bbb;
+  font-size: 15px;
+  margin-top: 10px;
+}
+
+.ad-block__hashtags{
+    display: flex;
+    
+}
+.ad-block__hashtags{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.ad-block__hashtag{
+    background: #2a3549;
+    border-radius: 4px;
+    padding: 5px 5px;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #fff;
+    margin-right: 5px;
+    display: flex;
+    
+}
+
+.hashtag-recommended{
+    background: #03d314;
+    box-shadow: 0 0 5px #03d314;
+    border-radius: 4px;
+    padding: 5px 5px;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #fff;
+    margin-right: 5px;
+    display: flex;
+    
+}
+
   @media (max-width:760px){
     :root{ --viewport-w:92vw; }
   }
