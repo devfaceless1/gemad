@@ -228,22 +228,25 @@
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  const tg = window.Telegram.WebApp;
   const searchInput = document.getElementById('searchInput');
   const suggestionsList = document.getElementById('suggestionsList');
   const adBlocks = document.querySelectorAll('.ad-block');
   const noResults = document.getElementById('noResults');
   const footer = document.querySelector('footer');
-  const tg = window.Telegram.WebApp;
+  const main = document.querySelector('main');
 
-  // --- фиксируем футер и добавляем паддинг для контента
+  tg.expand();
+
+  // --- фиксируем футер
   footer.style.position = 'fixed';
   footer.style.left = '0';
   footer.style.right = '0';
   footer.style.bottom = '0';
   footer.style.zIndex = '100';
-  document.querySelector('main').style.paddingBottom = '70px'; // высота футера
+  main.style.paddingBottom = '70px';
 
-  // --- собираем все хэштеги
+  // --- собираем хэштеги
   let hashtags = [];
   adBlocks.forEach(block => {
     const tagsAttr = block.dataset.tag || '';
@@ -252,14 +255,13 @@ document.addEventListener('DOMContentLoaded', () => {
       .filter(t => t.startsWith('#') && t.length > 1);
     hashtags.push(...tags);
   });
-  hashtags = Array.from(new Set(hashtags)); // убираем дубликаты
+  hashtags = [...new Set(hashtags)];
 
-  // --- обработчик ввода
+  // --- ввод поиска
   searchInput.addEventListener('input', () => {
     const query = searchInput.value.trim().toLowerCase();
     suggestionsList.innerHTML = '';
 
-    // --- фильтруем подсказки
     if (query) {
       const filtered = hashtags.filter(tag => tag.toLowerCase().includes(query));
       if (filtered.length) {
@@ -291,7 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
       block.style.display = matches ? '' : 'none';
       if (matches) found++;
 
-      // --- подсветка хэштега
       block.querySelectorAll('.ad-block__hashtag').forEach(h => {
         h.classList.remove('highlight');
         if (query && h.textContent.toLowerCase().includes(query)) {
@@ -300,10 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // --- сообщение "ничего не найдено"
-    if (noResults) {
-      noResults.style.display = (found === 0 && query !== '') ? 'block' : 'none';
-    }
+    noResults.style.display = (found === 0 && query !== '') ? 'block' : 'none';
   });
 
   // --- скрываем подсказки при клике вне поля
@@ -313,14 +311,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- расширяем WebApp при фокусе на input (чтобы футер не прыгал)
-  searchInput.addEventListener('focus', () => tg.expand());
+  // --- при фокусе скрываем футер (исправляем прыжок)
+  searchInput.addEventListener('focus', () => {
+    tg.expand();
+    footer.style.display = 'none';
+  });
 
-  // --- динамическая корректировка футера при изменении видимой области
+  // --- при потере фокуса возвращаем футер
+  searchInput.addEventListener('blur', () => {
+    setTimeout(() => {
+      footer.style.display = 'block';
+    }, 200);
+  });
+
+  // --- на всякий случай корректируем футер при изменении высоты окна
   tg.onEvent('viewportChanged', () => {
-    const vh = tg.viewportHeight; // видимая высота
-    const stable = tg.viewportStableHeight; // стабильная высота
-    footer.style.bottom = `${stable - vh}px`;
+    footer.style.bottom = '0';
   });
 });
 </script>
