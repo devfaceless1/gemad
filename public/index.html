@@ -42,12 +42,32 @@
         <div class="section-header__content">
           <h1 class="section__title">All available ads: </h1>
           <div class="search-container">
-            <input id="searchInput" type="text" placeholder="Search by hashtag... (#fun, #crypto)" autocomplete="off"/>
+            <input id="searchInput" type="text" placeholder="Search by hashtag... (#fun, #business)" autocomplete="off"/>
             <ul id="suggestionsList" class="suggestions"></ul>
           </div>
           <p id="noResults" class="no-results">Nothing found 😕 Try another hashtag</p>
           <div class="section-header__blocks">
-
+            <!-- block -->
+            <div class="ad-block" data-tag="#recommended #info #gem-ad">
+              <div class="ad-block__head">
+                <img class="ad-block__img" src="images/GemAd.jpg" alt="item">
+              </div>
+              <div class="ad-block__bottom">
+                
+                  <div class="ad-block__title">GemAd</div>
+                
+                <div class="ad-block__description">
+                  <div class="ad-block__username">@GemAdChannel</div>
+                  <div class="ad-block__desc block-bottom__item">The official channel of this mini app</div>
+                  <div class="ad-block__hashtags">
+                  <div class="hashtag-recommended">#recommended</div> 
+                  <div class="ad-block__hashtag">#info</div>
+                  <div class="ad-block__hashtag">#gem-ad</div>
+                  </div>
+                    <a href="https://t.me/GemAdChannel" class="ad-link ad-link__mobile block-bottom__item">Subscribe 15 ⭐</a>
+                </div>
+              </div>
+            </div>
             <!-- block -->
             <div class="ad-block" data-tag="#food #syrok #recommended">
               <div class="ad-block__head">
@@ -91,32 +111,13 @@
                   <div class="ad-block__hashtag">#business</div> 
                   <div class="ad-block__hashtag">#father</div>
                   <div class="ad-block__hashtag">#pavel</div>
+                  
                   </div>
                     <a href="https://t.me/durov" class="ad-link ad-link__mobile block-bottom__item">Subscribe 15 ⭐</a>
                 </div>
               </div>
             </div>
-            <!-- block -->
-            <div class="ad-block" data-tag="#recommended #info #ads">
-              <div class="ad-block__head">
-                <img class="ad-block__img" src="images/GemAd.jpg" alt="item">
-              </div>
-              <div class="ad-block__bottom">
-                
-                  <div class="ad-block__title">GemAd</div>
-                
-                <div class="ad-block__description">
-                  <div class="ad-block__username">@GemAdChannel</div>
-                  <div class="ad-block__desc block-bottom__item">The official channel of this mini app</div>
-                  <div class="ad-block__hashtags">
-                  <div class="hashtag-recommended">#recommended</div> 
-                  <div class="ad-block__hashtag">#info</div>
-                  <div class="ad-block__hashtag">#ads</div>
-                  </div>
-                    <a href="https://t.me/GemAdChannel" class="ad-link ad-link__mobile block-bottom__item">Subscribe 15 ⭐</a>
-                </div>
-              </div>
-            </div>
+            
             <!-- block -->
             <div class="ad-block" data-tag="#fun #monkeys #bradochki">
               <div class="ad-block__head">
@@ -328,7 +329,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const hashtagsClickable = document.querySelectorAll('.ad-block__hashtag, .hashtag-recommended');
+  const searchInput = document.getElementById('searchInput');
+  const suggestionsList = document.getElementById('suggestionsList');
 
+  hashtagsClickable.forEach(tag => {
+    tag.style.cursor = 'pointer'; // чтобы пользователь видел, что тег кликабелен
+    tag.addEventListener('click', () => {
+      const tagText = tag.textContent.trim();
+
+      // Переключаем на страницу с объявлениями, если вдруг открыта другая
+      window.showPage('page-ad');
+
+      // Вставляем тег в поиск и запускаем фильтрацию
+      searchInput.value = tagText;
+      suggestionsList.style.display = 'none';
+      searchInput.dispatchEvent(new Event('input'));
+
+      // Скроллим к началу, чтобы пользователь сразу видел результаты
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+});
+</script>
   <div id="telegram-messages"></div>
 
 
