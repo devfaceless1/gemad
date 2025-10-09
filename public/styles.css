@@ -503,7 +503,7 @@ main {
     background: #2a3549;
     border-radius: 4px;
     padding: 5px 5px;
-    margin-top: 10px;
+    margin-top: 5px;
     font-size: 14px;
     color: #fff;
     margin-right: 5px;
@@ -519,11 +519,11 @@ main {
 }
 
 .hashtag-recommended{
-    background: #1f5397;
-    box-shadow: 0 0 5px #1f5397;
+    background: #8096bb;
+    box-shadow: 0 0 5px #8096bb;
     border-radius: 4px;
     padding: 5px 5px;
-    margin-top: 10px;
+    margin-top: 5px;
     font-size: 14px;
     color: #fff;
     margin-right: 5px;
