@@ -69,21 +69,21 @@
               </div>
             </div>
             <!-- block -->
-            <div class="ad-block" data-tag="#food #syrok #recommended">
+            <div class="ad-block" data-tag="#gifts #stars #recommended">
               <div class="ad-block__head">
-                <img class="ad-block__img" src="images/nazvakanalu.jpg" alt="item">
+                <video class="ad-block__video" src="images/giftchanges.mp4" autoplay muted loop playsinline></video>
               </div>
               <div class="ad-block__bottom">
                 
-                  <div class="ad-block__title">Channel name</div>
+                  <div class="ad-block__title">Gift Changes 🎁</div>
                 
                 <div class="ad-block__description">
-                  <div class="ad-block__username">@kanal</div>
-                  <div class="ad-block__desc block-bottom__item">Ishov 5 den bez sush</div>
+                  <div class="ad-block__username">@GiftChanges</div>
+                  <div class="ad-block__desc block-bottom__item">Channel about gift changes</div>
                   <div class="ad-block__hashtags">
                   <div class="hashtag-recommended">#recommended</div>
-                  <div class="ad-block__hashtag">#food</div> 
-                  <div class="ad-block__hashtag">#syrok</div>
+                  <div class="ad-block__hashtag">#gifts</div> 
+                  <div class="ad-block__hashtag">#stars</div>
                   
                   </div>
                     <a href="https://t.me/miy_bloh" class="ad-link ad-link__mobile block-bottom__item">Subscribe 14 ⭐</a>
@@ -245,7 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   tg.expand();
 
-
   let hashtags = [];
   adBlocks.forEach(block => {
     const tagsAttr = block.dataset.tag || '';
@@ -255,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
     hashtags.push(...tags);
   });
   hashtags = [...new Set(hashtags)];
-
 
   searchInput.addEventListener('input', () => {
     const query = searchInput.value.trim().toLowerCase();
@@ -282,7 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
       suggestionsList.style.display = 'none';
     }
 
-
     let found = 0;
     adBlocks.forEach(block => {
       const tagsAttr = block.dataset.tag || '';
@@ -303,32 +300,41 @@ document.addEventListener('DOMContentLoaded', () => {
     noResults.style.display = (found === 0 && query !== '') ? 'block' : 'none';
   });
 
-
   document.addEventListener('click', e => {
     if (!e.target.closest('.search-container')) {
       suggestionsList.style.display = 'none';
     }
   });
 
+  // ✅ Фиксированный футер, который не выскакивает над клавиатурой
+  footer.style.position = 'fixed';
+  footer.style.bottom = '0';
+  footer.style.left = '0';
+  footer.style.right = '0';
+  footer.style.zIndex = '100';
+  footer.style.transition = 'opacity 0.25s ease';
 
-  searchInput.addEventListener('focus', () => {
-    tg.expand();
-    footer.style.display = 'none';
+  // Telegram автоматически сообщает, когда клавиатура открыта
+  tg.onEvent('viewportChanged', ({ isStateStable, height }) => {
+    if (!isStateStable) return;
+
+    const fullHeight = tg.viewportStableHeight;
+    const keyboardOpened = height < fullHeight - 100;
+
+    // Если клавиатура открыта — просто "отпускаем" футер вниз,
+    // чтобы Telegram не тянул его над клавиатурой.
+    if (keyboardOpened) {
+      footer.style.position = 'absolute';
+      footer.style.bottom = '0';
+    } else {
+      footer.style.position = 'fixed';
+      footer.style.bottom = '0';
+    }
   });
 
-  // --- при потере фокуса возвращаем футер
-  searchInput.addEventListener('blur', () => {
-    setTimeout(() => {
-      footer.style.display = 'block';
-    }, 200);
-  });
-
-
-  tg.onEvent('viewportChanged', () => {
-    footer.style.bottom = '0';
-  });
 });
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const hashtagsClickable = document.querySelectorAll('.ad-block__hashtag, .hashtag-recommended');
@@ -336,24 +342,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const suggestionsList = document.getElementById('suggestionsList');
 
   hashtagsClickable.forEach(tag => {
-    tag.style.cursor = 'pointer'; // чтобы пользователь видел, что тег кликабелен
+    tag.style.cursor = 'pointer';
     tag.addEventListener('click', () => {
       const tagText = tag.textContent.trim();
-
-      // Переключаем на страницу с объявлениями, если вдруг открыта другая
       window.showPage('page-ad');
-
-      // Вставляем тег в поиск и запускаем фильтрацию
       searchInput.value = tagText;
       suggestionsList.style.display = 'none';
       searchInput.dispatchEvent(new Event('input'));
-
-      // Скроллим к началу, чтобы пользователь сразу видел результаты
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
 });
 </script>
+
+
   <div id="telegram-messages"></div>
 
 

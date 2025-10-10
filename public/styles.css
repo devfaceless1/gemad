@@ -9,8 +9,8 @@ html{
 }
 
 .user-icon{
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
 }
 
@@ -81,11 +81,11 @@ html{
 
 .section-header__content{
     margin-top: 10px;
-    padding: 0 15px;
+    padding: 0 10px;
     margin-bottom: 85px;
 }
 
-/* ================== CASE ================== */
+/* ================== section header ================== */
 .section-header__blocks {
     display: grid;
     grid-template-columns: auto auto auto;
@@ -101,12 +101,28 @@ html{
     font-family: "Lexend", sans-serif;
     max-width: 200px;
     min-width: 180px;
+
+}
+
+.ad-block__head{
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* если у всех квадратные */
+    overflow: hidden;
 }
 
 .ad-block__img {
     width: 100%;
     border-radius: 15px;
     height: auto;
+}
+
+.ad-block__video{
+    width: 100%;
+    border-radius: 15px;
+    height: auto;
+    object-fit: cover; /* чтобы не растягивалось */
+     display: block;
 }
 
 .ad-block__bottom {
@@ -503,19 +519,18 @@ main {
 .ad-block__hashtags{
     display: flex;
     flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
 }
 
 .ad-block__hashtag{
     background: #2a3549;
     border-radius: 4px;
     padding: 5px 5px;
-    margin-top: 5px;
     font-size: 14px;
     color: #fff;
-    margin-right: 5px;
     display: flex;
     white-space: nowrap;
-    
 }
 
 
@@ -525,10 +540,8 @@ main {
     box-shadow: 0 0 5px #5a77a8;
     border-radius: 4px;
     padding: 5px 5px;
-    margin-top: 5px;
     font-size: 14px;
     color: #fff;
-    margin-right: 5px;
     display: flex;
     
 }
