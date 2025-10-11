@@ -1,3 +1,11 @@
+
+document.addEventListener('touchmove', function (e) {
+  if (window.scrollY <= 0 && e.touches[0].clientY > 0) {
+    e.preventDefault(); // блокирует нативный pull-to-refresh
+  }
+}, { passive: false });
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const tg = window.Telegram.WebApp;
   tg.expand();

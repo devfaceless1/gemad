@@ -9,9 +9,9 @@ html{
 }
 
 html, body {
-  overscroll-behavior-y: contain;
-  overscroll-behavior: none;
-  touch-action: none;
+  overscroll-behavior-y: none; /* отключает системный pull-to-refresh */
+  touch-action: pan-y;          /* разрешает вертикальный скролл */
+  
 }
 .user-icon{
     width: 35px;
