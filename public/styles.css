@@ -8,6 +8,11 @@ html{
    
 }
 
+html, body {
+  overscroll-behavior-y: contain;
+  touch-action: pan-x pan-down;
+}
+
 .user-icon{
     width: 35px;
     height: 35px;
