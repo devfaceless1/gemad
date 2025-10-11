@@ -182,7 +182,10 @@ html{
     display: flex;
 }
 
-.footer{padding-bottom: env(safe-area-inset-bottom);}
+.footer{
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+}
 
 .footer-nav{
     display: flex;
