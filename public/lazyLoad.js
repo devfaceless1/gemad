@@ -1,50 +1,93 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const container = document.querySelector('.section-header__blocks');
-  const searchInput = document.getElementById('searchInput');
-  const suggestionsList = document.getElementById('suggestionsList');
-  const noResults = document.getElementById('noResults');
+document.addEventListener("DOMContentLoaded", () => {
+  const tg = window.Telegram.WebApp;
+  tg.expand();
 
-  // Индикатор загрузки
-  const loadingIndicator = document.createElement('div');
-  loadingIndicator.id = 'loading';
-  loadingIndicator.style.cssText = `
-    display:none;
-    text-align:center;
-    margin:30px 0;
-    color:#fff;
-    font-weight:500;
-  `;
-  loadingIndicator.textContent = 'Loading...';
-  container.after(loadingIndicator);
+  const header = document.querySelector(".section-header");
+  const container = document.querySelector(".section-header__blocks");
+  const searchInput = document.getElementById("searchInput");
+  const suggestionsList = document.getElementById("suggestionsList");
+  const noResults = document.getElementById("noResults");
 
   let allAds = [];
   let displayedCount = 0;
   const batchSize = 10;
   let hashtags = [];
-  let isLoading = false;
+  let loading = false;
+  let allLoaded = false;
+  let isSearching = false;
+  let currentQuery = "";
+  let isRefreshing = false;
 
-  // Загружаем JSON
-  fetch('ads.json')
+  const loadingIndicator = document.createElement("div");
+  loadingIndicator.id = "loading";
+  loadingIndicator.innerHTML = `<div class="spinner"></div>`;
+  loadingIndicator.style.cssText = `
+    display:none; 
+    text-align:center; 
+    padding:20px; 
+    color:#fff;
+  `;
+  container.parentElement.appendChild(loadingIndicator);
+
+  const refreshIndicator = document.createElement("div");
+  refreshIndicator.id = "refreshIndicator";
+  refreshIndicator.innerHTML = `
+<svg width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#1e2533"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M3 12C3 16.9706 7.02944 21 12 21C14.3051 21 16.4077 20.1334 18 18.7083L21 16M21 12C21 7.02944 16.9706 3 12 3C9.69494 3 7.59227 3.86656 6 5.29168L3 8M21 21V16M21 16H16M3 3V8M3 8H8" stroke="#2a3549" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+  `;
+  refreshIndicator.style.cssText = `
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+  `;
+  document.body.appendChild(refreshIndicator);
+
+  const style = document.createElement("style");
+  style.innerHTML = `
+    #refreshIndicator.refreshing svg {
+      animation: spin 1s linear infinite;
+      transform-origin: 50% 50%;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // === ЗАГРУЗКА JSON ===
+  fetch("ads.json")
     .then(res => res.json())
     .then(adData => {
       allAds = adData;
       hashtags = [...new Set(allAds.flatMap(ad => ad.tags))];
+      shuffleAds();
       loadNextBatch();
     });
 
-  // Создание блока рекламы
+  function shuffleAds() {
+    allAds.sort(() => Math.random() - 0.5);
+  }
+
   function createBlock(ad) {
-    const block = document.createElement('div');
-    block.classList.add('ad-block');
-    block.dataset.tag = ad.tags.join(' ');
+    const block = document.createElement("div");
+    block.classList.add("ad-block");
+    block.dataset.tag = ad.tags.join(" ");
 
     const headContent = ad.image
       ? `<img class="ad-block__img" src="${ad.image}" alt="${ad.title}">`
-      : `<video class="ad-block__video" src="${ad.video}" autoplay muted loop playsinline></video>`;
+      : ad.video
+      ? `<video class="ad-block__video" src="${ad.video}" autoplay muted loop playsinline></video>`
+      : "";
 
     const hashtagsHTML = ad.tags
-      .map(tag => `<div class="${tag === "#recommended" ? 'hashtag-recommended' : 'ad-block__hashtag'}">${tag}</div>`)
-      .join('');
+      .map(tag => `<div class="${tag === "#recommended" ? "hashtag-recommended" : "ad-block__hashtag"}">${tag}</div>`)
+      .join("");
 
     block.innerHTML = `
       <div class="ad-block__head">${headContent}</div>
@@ -59,120 +102,190 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
 
-    // кликабельные хештеги
-    block.querySelectorAll('.ad-block__hashtag, .hashtag-recommended').forEach(tag => {
-      tag.style.cursor = 'pointer';
-      tag.addEventListener('click', () => {
+    block.querySelectorAll(".ad-block__hashtag, .hashtag-recommended").forEach(tag => {
+      tag.style.cursor = "pointer";
+      tag.addEventListener("click", () => {
         const tagText = tag.textContent.trim();
-        window.showPage('page-ad');
         searchInput.value = tagText;
-        suggestionsList.style.display = 'none';
-        searchInput.dispatchEvent(new Event('input'));
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        suggestionsList.style.display = "none";
+        searchInput.dispatchEvent(new Event("input"));
+        window.scrollTo({ top: 0, behavior: "smooth" });
       });
     });
 
     container.appendChild(block);
   }
 
-  // Подгрузка следующей партии
-  function loadNextBatch() {
-    if (isLoading || displayedCount >= allAds.length) return;
-    isLoading = true;
-    loadingIndicator.style.display = 'block';
-
-    const nextAds = allAds.slice(displayedCount, displayedCount + batchSize);
-
-    setTimeout(() => {
-      nextAds.forEach(ad => createBlock(ad));
-      displayedCount += nextAds.length;
-      loadingIndicator.style.display = 'none';
-      isLoading = false;
-    }, 700); // имитация загрузки
-  }
-
-  // Обработка поиска
-  searchInput.addEventListener('input', () => {
-    const query = searchInput.value.trim().toLowerCase();
-    suggestionsList.innerHTML = '';
-
-    if (!query) {
-      document.querySelectorAll('.ad-block').forEach(b => (b.style.display = ''));
-      noResults.style.display = 'none';
-      return;
-    }
-
-    const normalizedQuery = query.startsWith('#') ? query : `#${query}`;
-    const filtered = hashtags.filter(tag =>
-      tag.toLowerCase().includes(normalizedQuery.replace('#', ''))
-    );
-
-    if (filtered.length) {
-      filtered.forEach(tag => {
-        const li = document.createElement('li');
-        li.textContent = tag;
-        li.addEventListener('click', () => {
-          searchInput.value = tag;
-          suggestionsList.style.display = 'none';
-          searchInput.dispatchEvent(new Event('input'));
-        });
-        suggestionsList.appendChild(li);
-      });
-      suggestionsList.style.display = 'block';
-    } else {
-      suggestionsList.style.display = 'none';
-    }
-
-    // Если нужных каналов еще нет — загружаем до конца
-    if (displayedCount < allAds.length) {
-      const hasPotentialMatch = allAds.some(ad => {
-        const title = ad.title.toLowerCase();
-        const tags = ad.tags.map(t => t.toLowerCase());
-        return title.includes(query) || tags.some(t => t.includes(query.replace('#', '')));
-      });
-
-      if (hasPotentialMatch) loadUntilMatch(query);
-    }
-
-    // фильтруем блоки
-    let found = 0;
-    document.querySelectorAll('.ad-block').forEach(block => {
-      const tagsAttr = block.dataset.tag || '';
-      const tags = tagsAttr.split(' ').map(t => t.trim().toLowerCase());
-      const title = block.querySelector('.ad-block__title')?.textContent.toLowerCase() || '';
-      const match =
-        tags.some(tag => tag.includes(query.replace('#', ''))) ||
-        title.includes(query.replace('#', ''));
-      block.style.display = match ? '' : 'none';
-      if (match) found++;
-
-      // подсветка совпадающих тегов
-      block.querySelectorAll('.ad-block__hashtag').forEach(h => {
-        h.classList.remove('highlight');
-        if (query && h.textContent.toLowerCase().includes(query.replace('#', ''))) {
-          h.classList.add('highlight');
+  function highlightTags(query) {
+    const clean = (query || "").toLowerCase().replace(/^#/, "");
+    const blocks = container.querySelectorAll(".ad-block");
+    blocks.forEach(block => {
+      block.querySelectorAll(".ad-block__hashtag, .hashtag-recommended").forEach(h => {
+        h.classList.remove("highlight");
+        if (clean && h.textContent.toLowerCase().includes(clean)) {
+          h.classList.add("highlight");
         }
       });
     });
-
-    noResults.style.display = found === 0 ? 'block' : 'none';
-  });
-
-  // Загружает, пока не появится нужный тег/канал
-  function loadUntilMatch(query) {
-    const interval = setInterval(() => {
-      const prevDisplayed = displayedCount;
-      loadNextBatch();
-      if (displayedCount === prevDisplayed || displayedCount >= allAds.length) {
-        clearInterval(interval);
-      }
-    }, 800);
   }
 
-  // Подгрузка при прокрутке
-  window.addEventListener('scroll', () => {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+  function loadNextBatch() {
+    if (loading || allLoaded || isSearching) return;
+    loading = true;
+
+    const nextAds = allAds.slice(displayedCount, displayedCount + batchSize);
+    if (!nextAds.length) {
+      allLoaded = true;
+      loading = false;
+      return;
+    }
+
+    loadingIndicator.style.display = "block";
+    setTimeout(() => {
+      nextAds.forEach(ad => createBlock(ad));
+      displayedCount += nextAds.length;
+      loadingIndicator.style.display = "none";
+      loading = false;
+      highlightTags(currentQuery);
+    }, 500);
+  }
+
+  window.addEventListener("scroll", () => {
+    if (!loading && !allLoaded && !isSearching &&
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
       loadNextBatch();
     }
   });
+
+  // === PULL TO REFRESH ===
+let startY = 0;
+let pulling = false;
+let pullOffset = 0;
+
+function isPullEnabled() {
+  const activePage = document.querySelector(".page.active");
+  return activePage && activePage.id === "page-ad";
+}
+
+window.addEventListener("touchstart", e => {
+  if (!isPullEnabled() || window.scrollY > 0 || isRefreshing) return;
+  startY = e.touches[0].pageY;
+  pulling = true;
 });
+
+window.addEventListener("touchmove", e => {
+  if (!pulling || !isPullEnabled()) return;
+
+  const diff = e.touches[0].pageY - startY;
+  if (diff > 0) {
+    e.preventDefault();
+    pullOffset = Math.min(diff / 3, 60);
+
+    header.style.transform = `translateY(${pullOffset}px)`;
+
+    refreshIndicator.style.transform = `translate(-50%, ${pullOffset}px)`;
+    refreshIndicator.style.opacity = "1";
+
+    const rotateDeg = Math.min(pullOffset * 4, 360);
+    refreshIndicator.querySelector("svg").style.transform = `rotate(${rotateDeg}deg)`;
+  }
+});
+
+window.addEventListener("touchend", e => {
+  if (!pulling || !isPullEnabled()) return;
+  pulling = false;
+
+  const diff = e.changedTouches[0].pageY - startY;
+
+  header.style.transition = "transform 0.3s ease";
+  refreshIndicator.style.transition = "transform 0.3s ease, opacity 0.3s ease";
+
+  if (diff < 50) {
+    header.style.transform = "";
+    refreshIndicator.style.transform = "translate(-50%, -100%)";
+    refreshIndicator.style.opacity = "0";
+    return;
+  }
+
+  isRefreshing = true;
+  refreshIndicator.classList.add("refreshing");
+  refreshIndicator.style.transform = `translate(-50%, ${pullOffset}px)`;
+  refreshIndicator.style.opacity = "1";
+
+  setTimeout(() => {
+    container.innerHTML = "";
+    displayedCount = 0;
+    allLoaded = false;
+    shuffleAds();
+    loadNextBatch();
+
+    isRefreshing = false;
+    header.style.transform = "";
+    refreshIndicator.classList.remove("refreshing");
+    refreshIndicator.style.transform = "translate(-50%, -100%)";
+    refreshIndicator.style.opacity = "0";
+  }, 1200);
+});
+
+
+  // === SEARCHHH ===
+  searchInput.addEventListener("input", () => {
+    currentQuery = searchInput.value.trim();
+    const queryLower = currentQuery.toLowerCase();
+    suggestionsList.innerHTML = "";
+
+    isSearching = currentQuery.length > 0;
+
+    if (currentQuery) {
+      const filteredTags = hashtags.filter(tag => tag.toLowerCase().includes(currentQuery.replace(/^#/, "").toLowerCase()));
+      filteredTags.slice(0, 10).forEach(tag => {
+        const li = document.createElement("li");
+        li.textContent = tag;
+        li.style.cursor = "pointer";
+        li.addEventListener("click", () => {
+          searchInput.value = tag;
+          suggestionsList.style.display = "none";
+          searchInput.dispatchEvent(new Event("input"));
+        });
+        suggestionsList.appendChild(li);
+      });
+      suggestionsList.style.display = filteredTags.length ? "block" : "none";
+    } else {
+      suggestionsList.style.display = "none";
+    }
+
+    if (isSearching) {
+      container.innerHTML = "";
+      const matched = allAds.filter(ad => {
+        const title = (ad.title || "").toLowerCase();
+        const tags = (ad.tags || []).map(t => t.toLowerCase());
+        const clean = queryLower.replace(/^#/, "");
+        return title.includes(clean) || tags.some(t => t.includes(clean));
+      });
+
+      if (matched.length) {
+        matched.forEach(ad => createBlock(ad));
+        noResults.style.display = "none";
+      } else {
+        noResults.style.display = "block";
+      }
+
+      adBlocks = container.querySelectorAll(".ad-block");
+      highlightTags(currentQuery);
+    } else {
+      container.innerHTML = "";
+      displayedCount = 0;
+      allLoaded = false;
+      loadNextBatch();
+      noResults.style.display = "none";
+    }
+  });
+  document.addEventListener("click", e => {
+    if (!e.target.closest(".search-container")) {
+      suggestionsList.style.display = "none";
+      searchInput.blur();
+    }
+  });
+
+  
+}); 
