@@ -1,4 +1,4 @@
-(async function () {
+(function () {
     const tg = window.Telegram.WebApp;
     tg.expand();
 
@@ -9,6 +9,7 @@
     const firstName = user.first_name;
     const username = user.username;
     const avatarUrl = user.photo_url || (user.username ? `https://t.me/i/userpic/320/${user.username}.jpg` : '');
+
     window.telegramId = telegramId;
 
     const starsBalanceEl = document.getElementById('stars-balance');
@@ -39,7 +40,7 @@
         window.subscribedChannels = new Set(data.subscribedChannels || []);
     }
 
-    await initUser();
+    initUser();
 
     async function updateBalance(delta, channelUsername = null) {
         const res = await fetch('/api/user/update', {
@@ -58,54 +59,33 @@
         if (channelUsername) window.subscribedChannels.add(channelUsername);
     }
 
-    // ======= Новая часть: загрузка ads.json и создание блоков =======
-    const adsContainer = document.querySelector('.section-header__blocks') || document.body;
+    // === Делегирование клика по ссылкам ===
+    document.body.addEventListener('click', async (e) => {
+        const link = e.target.closest('.ad-link');
+        if (!link) return;
 
-    const adsRes = await fetch('/ads.json');
-    const ads = await adsRes.json();
+        e.preventDefault();
+        const channelUrl = link.getAttribute('href');
+        if (!channelUrl || channelUrl === '#') return;
 
-    ads.forEach(ad => {
-        const a = document.createElement('a');
-        a.href = ad.link;
-        a.className = 'ad-link';
-        a.dataset.reward = ad.reward.replace(/\D/g, ''); // оставляем только цифры
+        const channelUsername = channelUrl.replace('https://t.me/', '').replace('/', '');
 
-        a.innerHTML = `
-            <div class="ad-block">
-                <div class="ad-block__head">
-                    ${ad.image ? `<img src="${ad.image}" alt="${ad.title}" class="ad-block__img">` : ''}
-                    ${ad.video ? `<video src="${ad.video}" autoplay muted loop class="ad-block__video"></video>` : ''}
-                </div>
-                <div class="ad-block__bottom">
-                    <h2>${ad.title}</h2>
-                    <p>${ad.desc}</p>
-                    <div class="ad-block__reward">${ad.reward}</div>
-                </div>
-            </div>
-        `;
-        adsContainer.appendChild(a);
+        if (window.subscribedChannels.has(channelUsername)) {
+            showMessage('You already received stars for this channel!', 'error');
+            return;
+        }
+
+        // Получаем количество звезд из текста ссылки
+        const starsMatch = link.textContent.match(/\d+/);
+        const starsToAdd = starsMatch ? parseInt(starsMatch[0], 10) : 0;
+
+        await updateBalance(starsToAdd, channelUsername);
+        showMessage(`You earned ${starsToAdd} ⭐!`, 'success');
+
+        tg.openLink(`https://t.me/${channelUsername}`);
     });
 
-    // Навешиваем обработчик на динамически созданные ссылки
-    document.querySelectorAll('.ad-link').forEach(link => {
-        link.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const channelUsername = link.href.replace('https://t.me/', '').replace('/', '');
-
-            if (window.subscribedChannels.has(channelUsername)) {
-                showMessage('You already received stars for this channel!', 'error');
-                return;
-            }
-
-            const starsToAdd = parseInt(link.dataset.reward) || 0;
-            await updateBalance(starsToAdd, channelUsername);
-            showMessage(`You earned ${starsToAdd} ⭐!`, 'success');
-
-            tg.openLink(`https://t.me/${channelUsername}`);
-        });
-    });
-
-    // ======= Остальной твой код сообщений без изменений =======
+    // --- Сообщения ---
     let messageContainer = document.getElementById('telegram-messages');
     if (!messageContainer) {
         messageContainer = document.createElement('div');
