@@ -1,7 +1,15 @@
 
-document.addEventListener('touchmove', function (e) {
-  if (window.scrollY <= 0 && e.touches[0].clientY > 0) {
-    e.preventDefault(); 
+document.addEventListener('touchstart', (e) => {
+  window._startY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+  const touchY = e.touches[0].clientY;
+  const diff = touchY - (window._startY || 0);
+
+  // блокируем только если пытаются потянуть вниз с верха страницы
+  if (window.scrollY <= 0 && diff > 0) {
+    e.preventDefault(); // предотвращаем сдвиг Telegram WebApp вниз
   }
 }, { passive: false });
 
