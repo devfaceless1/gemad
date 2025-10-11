@@ -193,7 +193,7 @@ html{
     justify-content: center;
     align-items: center;
     z-index: 10;
-    padding-bottom: env(safe-area-inset-bottom); /* безопасная зона iPhone */
+    padding-bottom: env(safe-area-inset-bottom, 10px); /* fallback 10px для Android/ПК */
 }
 
 .footer-nav {
@@ -208,14 +208,16 @@ html{
 }
 
 .footer-nav__item a {
-    color: #fff;
-    text-decoration: none;
     display: flex;
     align-items: center;
     gap: 5px;
 }
 
-
+@supports(padding-bottom: env(safe-area-inset-bottom)) {
+    body, html {
+        padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    }
+}
 
 header {
     position: fixed;
