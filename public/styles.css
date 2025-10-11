@@ -182,31 +182,37 @@ html{
     display: flex;
 }
 
-.footer{
-    
-}
-
-.footer-nav{
-    display: flex;
-    background: #2a3549;
-    color: #fff;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    gap: 40px;
-    height: 90px;
-    width: 100%;
+.footer {
     position: fixed;
     bottom: 0;
     left: 0;
-    font-weight: 700;
-    z-index: 2;
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+    width: 100%;
+    height: 90px;
+    background: #2a3549;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    padding-bottom: env(safe-area-inset-bottom); /* безопасная зона iPhone */
 }
 
-.footer-nav__item{
-    
+.footer-nav {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-weight: 700;
+    font-size: 17px;
+    align-items: center;
+}
+
+.footer-nav__item a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 
