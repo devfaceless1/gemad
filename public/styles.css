@@ -9,7 +9,6 @@ html{
 }
 
 html, body {
-  overscroll-behavior-y: none; /* отключает системный pull-to-refresh */
   
   
 }
