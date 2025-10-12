@@ -19,6 +19,7 @@ function createCase({
   const btn = document.getElementById(buttonId);
   const resultEl = document.getElementById(resultId);
 
+  resultEl.style.marginTop = '10px';
   let totalItems = prizes.length * REPEAT;
 
   // === СОЗДАНИЕ ЛЕНТЫ ===
