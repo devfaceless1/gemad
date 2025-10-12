@@ -369,24 +369,27 @@ if (isSearching) {
 
 // === FOOTER HIDE ON KEYBOARD ===
 const footer = document.querySelector(".footer-nav");
-let initialHeight = window.innerHeight;
+let lastWindowHeight = window.innerHeight;
 let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 if (footer && isMobile) {
   window.addEventListener("resize", () => {
     const newHeight = window.innerHeight;
 
-    if (newHeight < initialHeight - 100) {
-      footer.style.opacity = "0";
-    } else {
- 
-      footer.style.transition = "transform 0.3s ease, opacity 0.3s ease";
+    if (lastWindowHeight - newHeight > 100) {
+      
+      footer.style.transition = "none";
+      footer.style.transform = "translateY(100%)";
+    } else if (newHeight - lastWindowHeight > 50) {
+      
+      footer.style.transition = "transform 0.3s ease";
       footer.style.transform = "translateY(0)";
-      footer.style.opacity = "1";
-      initialHeight = newHeight;
     }
+
+    lastWindowHeight = newHeight;
   });
 }
+
 
 
 });
