@@ -66,7 +66,7 @@ function createCase({
     btn.disabled = true;
 
     if (window.userBalance < cost) {
-      resultEl.textContent = `Not enough stars (${cost}⭐ required)!`;
+      resultEl.textContent = `Not enough stars`;
       btn.disabled = false;
       return;
     }
