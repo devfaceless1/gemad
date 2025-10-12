@@ -367,26 +367,31 @@ if (isSearching) {
   }, 1200);
 }
 
-// === FOOTER HIDE ON KEYBOARD ===
 const footer = document.querySelector(".footer-nav");
-let lastWindowHeight = window.innerHeight;
 let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 if (footer && isMobile) {
-  window.addEventListener("resize", () => {
-    const newHeight = window.innerHeight;
+  const hideFooter = () => {
+    footer.style.transition = "none";  
+    footer.style.transform = "translateY(100%)";
+  };
 
-    if (lastWindowHeight - newHeight > 100) {
-      
-      footer.style.transition = "none";
-      footer.style.transform = "translateY(100%)";
-    } else if (newHeight - lastWindowHeight > 50) {
-      
-      footer.style.transition = "transform 0.3s ease";
-      footer.style.transform = "translateY(0)";
+  const showFooter = () => {
+    footer.style.transition = "transform 0.5s ease";
+    footer.style.transform = "translateY(0)";
+  };
+
+  document.addEventListener("focusin", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+      hideFooter();
     }
+  });
 
-    lastWindowHeight = newHeight;
+  document.addEventListener("focusout", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+
+      setTimeout(showFooter, 100);
+    }
   });
 }
 
