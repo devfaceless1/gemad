@@ -377,9 +377,6 @@ if (footer && isMobile) {
     const newHeight = window.innerHeight;
 
     if (newHeight < initialHeight - 100) {
-  
-      footer.style.transition = "transform 0s ease, opacity 0s ease";
-      footer.style.transform = "translateY(100%)";
       footer.style.opacity = "0";
     } else {
  
