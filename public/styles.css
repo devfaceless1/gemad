@@ -87,6 +87,7 @@ html, body {
     margin-top: 10px;
     padding: 0 10px;
     margin-bottom: 85px;
+    
 }
 
 /* ================== section header ================== */
@@ -458,17 +459,95 @@ main {
 
 /* SEARCH */
 
+.section__page-ad{
+    display: flex;
+    flex-direction: column;
+    
+
+}
+
+.section-search{
+    width: 100%;
+    margin-top: 10px;
+    padding: 0 10px;
+    color: #fff;
+}
+
 .search-container {
+    position: relative;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    
+}
+
+.search-wrapper {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  flex: 1;
+  max-width: 375px;
+
+  
+}
+
+.clear-search {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-48%); 
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: none;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 15px;
+  transition: opacity 0.2s ease;
+}
+
+
+.clear-search svg {
+  opacity: 0.7;
+}
+
+.clear-search:hover svg {
+  opacity: 1;
+}
+
+.update-list__button{
+    padding: 10px 10px;
+    border-radius: 10px;
+    border: none;
+    background: #1e2533;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.6s;
+}
+
+.update-list__button svg {
+  transition: transform 0.6s ease;
+}
+
+.update-list__button svg.rotating {
+  animation: spin 1s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 #searchInput {
-  width: 90%;
-  max-width: 400px;
+  width: 100%;
+ 
   padding: 10px 15px;
   border-radius: 10px;
   border: none;
@@ -476,6 +555,7 @@ main {
   color: #fff;
   font-size: 16px;
   outline: none;
+  
 }
 
 #searchInput::placeholder {
@@ -485,13 +565,13 @@ main {
 .suggestions {
   position: absolute;
   top: 45px;
-  width: 90%;
-  max-width: 400px;
+  width: 100%;
+  max-width: 415px;
   background: #1e2533;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   overflow-y: auto;       
-  max-height: 200px;     
+  max-height: 155px;     
   display: none;
   z-index: 10;
   list-style: none;
@@ -522,11 +602,13 @@ main {
 }
 
 .no-results {
-  display: none;
-  text-align: center;
-  color: #bbb;
-  font-size: 15px;
-  margin-top: 10px;
+   
+    display: none;
+    text-align: center;
+    color: #bbb;
+    font-size: 15px;
+    margin-top: 50%;
+    
 }
 
 .ad-block__hashtags{
@@ -623,11 +705,14 @@ main {
 
 @media screen and (max-width: 370px) {
     .section-header__blocks{
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     .section-cases__blocks{
         grid-template-columns: 1fr ;
     }
+    
     
 }
 

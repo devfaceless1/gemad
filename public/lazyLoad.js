@@ -1,4 +1,3 @@
-
 document.addEventListener('touchstart', (e) => {
   window._startY = e.touches[0].clientY;
 }, { passive: true });
@@ -7,22 +6,22 @@ document.addEventListener('touchmove', (e) => {
   const touchY = e.touches[0].clientY;
   const diff = touchY - (window._startY || 0);
 
-  // блокируем только если пытаются потянуть вниз с верха страницы
   if (window.scrollY <= 0 && diff > 0) {
-    e.preventDefault(); // предотвращаем сдвиг Telegram WebApp вниз
+    e.preventDefault(); 
   }
 }, { passive: false });
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const tg = window.Telegram.WebApp;
   tg.expand();
 
-  const header = document.querySelector(".section-header");
+  const header = document.querySelector(".section__page-ad");
   const container = document.querySelector(".section-header__blocks");
   const searchInput = document.getElementById("searchInput");
   const suggestionsList = document.getElementById("suggestionsList");
   const noResults = document.getElementById("noResults");
+  const clearSearchBtn = document.getElementById("clearSearchBtn");
+  const updateButton = document.querySelector(".update-list__button");
 
   let allAds = [];
   let displayedCount = 0;
@@ -33,22 +32,24 @@ document.addEventListener("DOMContentLoaded", () => {
   let isSearching = false;
   let currentQuery = "";
   let isRefreshing = false;
+  let currentSearchToken = 0;
 
+  // === LOADING INDICATOR ===
   const loadingIndicator = document.createElement("div");
   loadingIndicator.id = "loading";
   loadingIndicator.innerHTML = `<div class="spinner"></div>`;
   loadingIndicator.style.cssText = `
-    display:none; 
-    text-align:center; 
-    padding:20px; 
-    color:#fff;
+    display:none; text-align:center; padding:20px; color:#fff;
   `;
   container.parentElement.appendChild(loadingIndicator);
 
+  // === REFRESH INDICATOR ===
   const refreshIndicator = document.createElement("div");
   refreshIndicator.id = "refreshIndicator";
   refreshIndicator.innerHTML = `
-<svg width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#1e2533"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M3 12C3 16.9706 7.02944 21 12 21C14.3051 21 16.4077 20.1334 18 18.7083L21 16M21 12C21 7.02944 16.9706 3 12 3C9.69494 3 7.59227 3.86656 6 5.29168L3 8M21 21V16M21 16H16M3 3V8M3 8H8" stroke="#2a3549" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+<svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#fff">
+  <path d="M3 12C3 16.9706 7.02944 21 12 21C14.3051 21 16.4077 20.1334 18 18.7083L21 16M21 12C21 7.02944 16.9706 3 12 3C9.69494 3 7.59227 3.86656 6 5.29168L3 8M21 21V16M21 16H16M3 3V8M3 8H8" stroke="#1e2533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
   `;
   refreshIndicator.style.cssText = `
     position: absolute;
@@ -58,8 +59,8 @@ document.addEventListener("DOMContentLoaded", () => {
     opacity: 0;
     transition: transform 0.2s ease, opacity 0.2s ease;
     z-index: 2;
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
   `;
   document.body.appendChild(refreshIndicator);
 
@@ -69,14 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
       animation: spin 1s linear infinite;
       transform-origin: 50% 50%;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   `;
   document.head.appendChild(style);
 
-  // === ЗАГРУЗКА JSON ===
+  // === FETCH ADS ===
   fetch("ads.json")
     .then(res => res.json())
     .then(adData => {
@@ -121,8 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
     block.querySelectorAll(".ad-block__hashtag, .hashtag-recommended").forEach(tag => {
       tag.style.cursor = "pointer";
       tag.addEventListener("click", () => {
-        const tagText = tag.textContent.trim();
-        searchInput.value = tagText;
+        searchInput.value = tag.textContent.trim();
         suggestionsList.style.display = "none";
         searchInput.dispatchEvent(new Event("input"));
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -134,8 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function highlightTags(query) {
     const clean = (query || "").toLowerCase().replace(/^#/, "");
-    const blocks = container.querySelectorAll(".ad-block");
-    blocks.forEach(block => {
+    container.querySelectorAll(".ad-block").forEach(block => {
       block.querySelectorAll(".ad-block__hashtag, .hashtag-recommended").forEach(h => {
         h.classList.remove("highlight");
         if (clean && h.textContent.toLowerCase().includes(clean)) {
@@ -147,17 +143,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function loadNextBatch() {
     if (loading || allLoaded || isSearching) return;
-    loading = true;
 
+    loading = true;
     const nextAds = allAds.slice(displayedCount, displayedCount + batchSize);
-    if (!nextAds.length) {
-      allLoaded = true;
-      loading = false;
-      return;
-    }
+    if (!nextAds.length) { allLoaded = true; loading = false; return; }
 
     loadingIndicator.style.display = "block";
     setTimeout(() => {
+      if (isSearching) { loadingIndicator.style.display = "none"; loading = false; return; }
       nextAds.forEach(ad => createBlock(ad));
       displayedCount += nextAds.length;
       loadingIndicator.style.display = "none";
@@ -168,93 +161,83 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("scroll", () => {
     if (!loading && !allLoaded && !isSearching &&
-      window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
       loadNextBatch();
     }
   });
 
   // === PULL TO REFRESH ===
-let startY = 0;
-let pulling = false;
-let pullOffset = 0;
+  let startY = 0, pulling = false, pullOffset = 0;
+  function isPullEnabled() {
+    const activePage = document.querySelector(".page.active");
+    return activePage && activePage.id === "page-ad";
+  }
 
-function isPullEnabled() {
-  const activePage = document.querySelector(".page.active");
-  return activePage && activePage.id === "page-ad";
-}
+  window.addEventListener("touchstart", e => {
+    if (!isPullEnabled() || window.scrollY > 0 || isRefreshing) return;
+    startY = e.touches[0].pageY; pulling = true;
+  });
 
-window.addEventListener("touchstart", e => {
-  if (!isPullEnabled() || window.scrollY > 0 || isRefreshing) return;
-  startY = e.touches[0].pageY;
-  pulling = true;
-});
+  window.addEventListener("touchmove", e => {
+    if (!pulling || !isPullEnabled()) return;
+    const diff = e.touches[0].pageY - startY;
+    if (diff > 0) {
+      e.preventDefault();
+      pullOffset = Math.min(diff / 3, 60);
+      header.style.transform = `translateY(${pullOffset}px)`;
+      refreshIndicator.style.transform = `translate(-50%, ${pullOffset}px)`;
+      refreshIndicator.style.opacity = "1";
+      refreshIndicator.querySelector("svg").style.transform = `rotate(${Math.min(pullOffset*4,360)}deg)`;
+    }
+  });
 
-window.addEventListener("touchmove", e => {
-  if (!pulling || !isPullEnabled()) return;
+  window.addEventListener("touchend", e => {
+    if (!pulling || !isPullEnabled()) return;
+    pulling = false;
+    const diff = e.changedTouches[0].pageY - startY;
 
-  const diff = e.touches[0].pageY - startY;
-  if (diff > 0) {
-    e.preventDefault();
-    pullOffset = Math.min(diff / 3, 60);
+    header.style.transition = "transform 0.3s ease";
+    refreshIndicator.style.transition = "transform 0.3s ease, opacity 0.3s ease";
 
-    header.style.transform = `translateY(${pullOffset}px)`;
+    if (diff < 50) {
+      header.style.transform = "";
+      refreshIndicator.style.transform = "translate(-50%, -100%)";
+      refreshIndicator.style.opacity = "0";
+      return;
+    }
 
+    isRefreshing = true;
+    refreshIndicator.classList.add("refreshing");
     refreshIndicator.style.transform = `translate(-50%, ${pullOffset}px)`;
     refreshIndicator.style.opacity = "1";
 
-    const rotateDeg = Math.min(pullOffset * 4, 360);
-    refreshIndicator.querySelector("svg").style.transform = `rotate(${rotateDeg}deg)`;
-  }
-});
+    setTimeout(() => {
+      container.innerHTML = "";
+      displayedCount = 0;
+      allLoaded = false;
+      shuffleAds();
+      loadNextBatch();
+      isRefreshing = false;
+      header.style.transform = "";
+      refreshIndicator.classList.remove("refreshing");
+      refreshIndicator.style.transform = "translate(-50%, -100%)";
+      refreshIndicator.style.opacity = "0";
+    }, 1200);
+  });
 
-window.addEventListener("touchend", e => {
-  if (!pulling || !isPullEnabled()) return;
-  pulling = false;
-
-  const diff = e.changedTouches[0].pageY - startY;
-
-  header.style.transition = "transform 0.3s ease";
-  refreshIndicator.style.transition = "transform 0.3s ease, opacity 0.3s ease";
-
-  if (diff < 50) {
-    header.style.transform = "";
-    refreshIndicator.style.transform = "translate(-50%, -100%)";
-    refreshIndicator.style.opacity = "0";
-    return;
-  }
-
-  isRefreshing = true;
-  refreshIndicator.classList.add("refreshing");
-  refreshIndicator.style.transform = `translate(-50%, ${pullOffset}px)`;
-  refreshIndicator.style.opacity = "1";
-
-  setTimeout(() => {
-    container.innerHTML = "";
-    displayedCount = 0;
-    allLoaded = false;
-    shuffleAds();
-    loadNextBatch();
-
-    isRefreshing = false;
-    header.style.transform = "";
-    refreshIndicator.classList.remove("refreshing");
-    refreshIndicator.style.transform = "translate(-50%, -100%)";
-    refreshIndicator.style.opacity = "0";
-  }, 1200);
-});
-
-
-  // === SEARCHHH ===
+  // === SEARCH ===
   searchInput.addEventListener("input", () => {
+    const token = ++currentSearchToken;
     currentQuery = searchInput.value.trim();
     const queryLower = currentQuery.toLowerCase();
-    suggestionsList.innerHTML = "";
 
     isSearching = currentQuery.length > 0;
+    suggestionsList.innerHTML = "";
 
-    if (currentQuery) {
-      const filteredTags = hashtags.filter(tag => tag.toLowerCase().includes(currentQuery.replace(/^#/, "").toLowerCase()));
-      filteredTags.slice(0, 10).forEach(tag => {
+    // Show suggestions
+    if (isSearching) {
+      const filteredTags = hashtags.filter(tag => tag.toLowerCase().includes(queryLower.replace(/^#/, "")));
+      filteredTags.slice(0,10).forEach(tag => {
         const li = document.createElement("li");
         li.textContent = tag;
         li.style.cursor = "pointer";
@@ -270,8 +253,10 @@ window.addEventListener("touchend", e => {
       suggestionsList.style.display = "none";
     }
 
+    container.innerHTML = "";
+    noResults.style.display = "none";
+
     if (isSearching) {
-      container.innerHTML = "";
       const matched = allAds.filter(ad => {
         const title = (ad.title || "").toLowerCase();
         const tags = (ad.tags || []).map(t => t.toLowerCase());
@@ -279,29 +264,82 @@ window.addEventListener("touchend", e => {
         return title.includes(clean) || tags.some(t => t.includes(clean));
       });
 
-      if (matched.length) {
-        matched.forEach(ad => createBlock(ad));
-        noResults.style.display = "none";
-      } else {
-        noResults.style.display = "block";
-      }
+      setTimeout(() => {
+        if (token !== currentSearchToken) return; // ignore outdated
+        container.innerHTML = "";
+        if (matched.length) matched.forEach(ad => createBlock(ad));
+        noResults.style.display = matched.length ? "none" : "block";
+        highlightTags(currentQuery);
+      }, 0);
 
-      adBlocks = container.querySelectorAll(".ad-block");
-      highlightTags(currentQuery);
     } else {
-      container.innerHTML = "";
       displayedCount = 0;
       allLoaded = false;
       loadNextBatch();
       noResults.style.display = "none";
     }
-  });
-  document.addEventListener("click", e => {
-    if (!e.target.closest(".search-container")) {
-      suggestionsList.style.display = "none";
-      searchInput.blur();
-    }
+
+    clearSearchBtn.style.display = currentQuery ? "block" : "none";
   });
 
+  clearSearchBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    clearSearchBtn.style.display = "none";
+    suggestionsList.style.display = "none";
+    noResults.style.display = "none";
+
+    container.innerHTML = "";
+    displayedCount = 0;
+    allLoaded = false;
+    isSearching = false;
+    currentQuery = "";
+    loadNextBatch();
+  });
+
+  // === REFRESH BUTTON ===
+  if (updateButton) {
+    updateButton.addEventListener("click", () => {
+      const svg = updateButton.querySelector("svg");
+      if (!svg) return;
+      svg.classList.add("rotating");
+      refreshAds(true);
+      setTimeout(() => svg.classList.remove("rotating"), 1500);
+    });
+  }
+
+  function refreshAds(fromButton = false) {
+  if (isRefreshing) return;
+  isRefreshing = true;
+
   
-}); 
+  clearSearchBtn.style.display = "none";
+
+  if (!fromButton) {
+    refreshIndicator.classList.add("refreshing");
+    refreshIndicator.style.transform = "translate(-50%, 60px)";
+    refreshIndicator.style.opacity = "1";
+  }
+
+  setTimeout(() => {
+    container.innerHTML = "";
+    displayedCount = 0;
+    allLoaded = false;
+    isSearching = false;
+    currentQuery = "";
+    searchInput.value = "";
+    noResults.style.display = "none";
+
+    shuffleAds();
+    loadNextBatch();
+
+    if (!fromButton) {
+      refreshIndicator.classList.remove("refreshing");
+      refreshIndicator.style.transform = "translate(-50%, -100%)";
+      refreshIndicator.style.opacity = "0";
+    }
+
+    isRefreshing = false;
+  }, 1200);
+}
+
+});
