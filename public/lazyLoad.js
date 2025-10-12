@@ -235,44 +235,55 @@ document.addEventListener("DOMContentLoaded", () => {
     suggestionsList.innerHTML = "";
 
     // Show suggestions
-    // Show suggestions
+// === SUGGESTIONS ===
 if (isSearching) {
+  const cleanQuery = queryLower.replace(/^#/, "");
   const filteredTags = hashtags.filter(tag =>
-    tag.toLowerCase().includes(queryLower.replace(/^#/, ""))
+    tag.toLowerCase().includes(cleanQuery)
   );
-  
-  filteredTags.slice(0, 10).forEach(tag => {
-    const li = document.createElement("li");
-    li.textContent = tag;
-    li.style.cursor = "pointer";
-    li.addEventListener("click", () => {
-      // Ставим выбранную подсказку в инпут
-      searchInput.value = tag;
-      currentQuery = tag;
-      suggestionsList.style.display = "none";
 
-      // Сразу показываем результаты по выбранной подсказке
-      isSearching = true;
-      container.innerHTML = "";
-      const matched = allAds.filter(ad => {
-        const title = (ad.title || "").toLowerCase();
-        const tags = (ad.tags || []).map(t => t.toLowerCase());
-        return title.includes(tag.toLowerCase()) || tags.some(t => t.includes(tag.toLowerCase()));
+  // 👇 Проверка: если пользователь уже ввёл полный тег — подсказки не нужны
+  const isFullMatch = hashtags.some(
+    tag => tag.toLowerCase() === currentQuery.toLowerCase()
+  );
+
+  if (!isFullMatch && filteredTags.length > 0) {
+    filteredTags.slice(0, 10).forEach(tag => {
+      const li = document.createElement("li");
+      li.textContent = tag;
+      li.style.cursor = "pointer";
+      li.addEventListener("click", () => {
+        
+        searchInput.value = tag;
+        currentQuery = tag;
+        suggestionsList.style.display = "none";
+
+        
+        isSearching = true;
+        container.innerHTML = "";
+        const matched = allAds.filter(ad => {
+          const title = (ad.title || "").toLowerCase();
+          const tags = (ad.tags || []).map(t => t.toLowerCase());
+          return title.includes(tag.toLowerCase()) || tags.some(t => t.includes(tag.toLowerCase()));
+        });
+
+        if (matched.length) {
+          matched.forEach(ad => createBlock(ad));
+          noResults.style.display = "none";
+        } else {
+          noResults.style.display = "block";
+        }
+        highlightTags(currentQuery);
+        clearSearchBtn.style.display = "block";
       });
-
-      if (matched.length) {
-        matched.forEach(ad => createBlock(ad));
-        noResults.style.display = "none";
-      } else {
-        noResults.style.display = "block";
-      }
-      highlightTags(currentQuery);
-      clearSearchBtn.style.display = "block";
+      suggestionsList.appendChild(li);
     });
-    suggestionsList.appendChild(li);
-  });
 
-  suggestionsList.style.display = filteredTags.length ? "block" : "none";
+    suggestionsList.style.display = "block";
+  } else {
+   
+    suggestionsList.style.display = "none";
+  }
 } else {
   suggestionsList.style.display = "none";
 }
