@@ -235,23 +235,48 @@ document.addEventListener("DOMContentLoaded", () => {
     suggestionsList.innerHTML = "";
 
     // Show suggestions
-    if (isSearching) {
-      const filteredTags = hashtags.filter(tag => tag.toLowerCase().includes(queryLower.replace(/^#/, "")));
-      filteredTags.slice(0,10).forEach(tag => {
-        const li = document.createElement("li");
-        li.textContent = tag;
-        li.style.cursor = "pointer";
-        li.addEventListener("click", () => {
-          searchInput.value = tag;
-          suggestionsList.style.display = "none";
-          searchInput.dispatchEvent(new Event("input"));
-        });
-        suggestionsList.appendChild(li);
-      });
-      suggestionsList.style.display = filteredTags.length ? "block" : "none";
-    } else {
+    // Show suggestions
+if (isSearching) {
+  const filteredTags = hashtags.filter(tag =>
+    tag.toLowerCase().includes(queryLower.replace(/^#/, ""))
+  );
+  
+  filteredTags.slice(0, 10).forEach(tag => {
+    const li = document.createElement("li");
+    li.textContent = tag;
+    li.style.cursor = "pointer";
+    li.addEventListener("click", () => {
+      // Ставим выбранную подсказку в инпут
+      searchInput.value = tag;
+      currentQuery = tag;
       suggestionsList.style.display = "none";
-    }
+
+      // Сразу показываем результаты по выбранной подсказке
+      isSearching = true;
+      container.innerHTML = "";
+      const matched = allAds.filter(ad => {
+        const title = (ad.title || "").toLowerCase();
+        const tags = (ad.tags || []).map(t => t.toLowerCase());
+        return title.includes(tag.toLowerCase()) || tags.some(t => t.includes(tag.toLowerCase()));
+      });
+
+      if (matched.length) {
+        matched.forEach(ad => createBlock(ad));
+        noResults.style.display = "none";
+      } else {
+        noResults.style.display = "block";
+      }
+      highlightTags(currentQuery);
+      clearSearchBtn.style.display = "block";
+    });
+    suggestionsList.appendChild(li);
+  });
+
+  suggestionsList.style.display = filteredTags.length ? "block" : "none";
+} else {
+  suggestionsList.style.display = "none";
+}
+
 
     container.innerHTML = "";
     noResults.style.display = "none";
@@ -341,5 +366,30 @@ document.addEventListener("DOMContentLoaded", () => {
     isRefreshing = false;
   }, 1200);
 }
+
+// === FOOTER HIDE ON KEYBOARD ===
+const footer = document.querySelector(".footer-nav");
+let initialHeight = window.innerHeight;
+let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+if (footer && isMobile) {
+  window.addEventListener("resize", () => {
+    const newHeight = window.innerHeight;
+
+    if (newHeight < initialHeight - 100) {
+  
+      footer.style.transition = "transform 0.3s ease, opacity 0.3s ease";
+      footer.style.transform = "translateY(100%)";
+      footer.style.opacity = "0";
+    } else {
+ 
+      footer.style.transition = "transform 0.3s ease, opacity 0.3s ease";
+      footer.style.transform = "translateY(0)";
+      footer.style.opacity = "1";
+      initialHeight = newHeight;
+    }
+  });
+}
+
 
 });
