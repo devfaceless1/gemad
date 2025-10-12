@@ -14,7 +14,7 @@
     "desc": "Channel about gift changes",
     "video": "images/giftchanges.mp4",
     "link": "https://t.me/GiftChanges",
-    "tags": ["#recommended", "#gifts", "#stars"],
+    "tags": ["#recommended", "#gifts", "#nft"],
     "reward": "14 ⭐"
   },
   {
@@ -42,6 +42,51 @@
     "image": "images/gotlib.jpg",
     "link": "https://t.me/fuckgotlib",
     "tags": ["#swag", "#style", "#music"],
+    "reward": "15 ⭐"
+  },
+  {
+    "title": "Sonata Studio",
+    "username": "@SonataStudio",
+    "desc": "Create your own Chat-bot",
+    "video": "images/sonatastudio.mp4",
+    "link": "https://t.me/SonataStudio",
+    "tags": ["#development","#chat-bots" , "#tools"],
+    "reward": "15 ⭐"
+  },
+  {
+    "title": "GIFT Calculator",
+    "username": "@PriceNFTbot",
+    "desc": "Send a gift - get a profile price.",
+    "image": "images/nftgiftcalculator.jpg",
+    "link": "https://t.me/PriceNFTbot",
+    "tags": ["#bot", "#gifts", "#nft-gifts"],
+    "reward": "15 ⭐"
+  },
+  {
+    "title": "lilpeep world",
+    "username": "@lilpeepworldd",
+    "desc": "Lil peep songs, news, info",
+    "image": "images/lilpeepworld.jpg",
+    "link": "https://t.me/lilpeepworldd",
+    "tags": ["#music", "#lilpeep", "#fanclub"],
+    "reward": "15 ⭐"
+  },
+  {
+    "title": "dass🐒",
+    "username": "@bibizyan20",
+    "desc": "I love my monkey <3",
+    "image": "images/dass.jpg",
+    "link": "https://t.me/bibizyan20",
+    "tags": ["#monkeys", "#fun", "#blog"],
+    "reward": "15 ⭐"
+  },
+  {
+    "title": "music editor",
+    "username": "@musiceditor_tgbot",
+    "desc": "Music tag editor",
+    "image": "images/musiceditor.jpg",
+    "link": "https://t.me/musiceditor_tgbot",
+    "tags": ["#usefull", "#bot", "#music"],
     "reward": "15 ⭐"
   }
 ]

@@ -79,14 +79,24 @@
           <div class="case-block__bottom">
             <h2 class="case-block__title">Durov's Case</h2>
             <div class="case-block__desc">Try your luck and win stars!</div>
-            <div class="case-block__price">Price: 200 ⭐</div>
+            <div class="case-block__price">Price: 150 ⭐</div>
+          </div>
+        </a>
+        <a class="case-block" href="#" onclick="showPage('case-oldmoney', event)">
+          <div class="case-block__head">
+            <img class="case-block__img" src="images/gemAd.jpg" alt="item">
+          </div>
+          <div class="case-block__bottom">
+            <h2 class="case-block__title">GemAd Case</h2>
+            <div class="case-block__desc">Try your luck and win stars!</div>
+            <div class="case-block__price">Price: 1000 ⭐</div>
           </div>
         </a>
 
       </div>
 
       <a class="back-button" href="#" onclick="showPage('page-ad', event)">
-        <img style="width: 30px; height: 30px;" src="images/left-arrow.svg" alt="back">
+        <img style="width: 25px; height: 25px;" src="images/left-arrow.svg" alt="back">
       </a>
     </div>
   </div>
@@ -101,9 +111,23 @@
     <div class="indicator" aria-hidden="true"></div>
   </div>
 
-  <button class="spin-btn" id="spin">Spin 200 ⭐</button>
+  <button class="spin-btn" id="spin">Spin 150 ⭐</button>
   <div id="result"></div>
-      <a class="back-button" href="#" onclick="showPage('page-cases', event)"> <img style="width: 30px; height: 30px;" src="images/left-arrow.svg" alt="back"> </a>
+      <a class="back-button" href="#" onclick="showPage('page-cases', event)"> <img style="width: 25px; height: 25px;" src="images/left-arrow.svg" alt="back"> </a>
+      
+      </div>
+    </section>
+    <section id="case-oldmoney" class="page">
+      <div class="case-durov">
+      <h1 class="section__title">GemAd Case</h1>
+      <div class="viewport" id="viewport2">
+    <div class="strip" id="strip2"></div>
+    <div class="indicator" aria-hidden="true"></div>
+  </div>
+
+  <button class="spin-btn" id="spin2">Spin 1000 ⭐</button>
+  <div id="result2"></div>
+      <a class="back-button" href="#" onclick="showPage('page-cases', event)"> <img style="width: 25px; height: 25px;" src="images/left-arrow.svg" alt="back"> </a>
       
       </div>
     </section>
@@ -125,6 +149,7 @@
 
   <!-- tg + nav -->
    <script src="spin.js"></script>
+   <script src="cases.js"></script>
 <script>
   const tg = window.Telegram.WebApp;
   tg.expand();
