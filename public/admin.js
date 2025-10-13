@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const ADMIN_TELEGRAM_ID = "7613674527"; // 👉 замени на свой настоящий Telegram ID
+  const ADMIN_TELEGRAM_ID = "7613674527"; // 👉 твой Telegram ID
 
   const adminPanelBtn = document.getElementById("adminPanelBtn");
   const uploadBtn = document.getElementById("uploadAdBtn");
@@ -8,9 +8,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const adDesc = document.getElementById("adDesc");
   const adTags = document.getElementById("adTags");
   const adLink = document.getElementById("adLink");
-  const adReward = document.getElementById("adReward"); 
+  const adReward = document.getElementById("adReward");
+  const adUsername = document.getElementById("adUsername"); // новое поле
 
-  // === Проверка: показывать ли кнопку ===
+  // Проверка: показывать ли кнопку
   const tg = window.Telegram.WebApp;
   const user = tg.initDataUnsafe?.user;
 
@@ -19,9 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
     adminPanelBtn.addEventListener("click", () => showPage("page-admin"));
   }
 
-  // === Загрузка рекламы ===
+  // Загрузка рекламы
   uploadBtn.addEventListener("click", async () => {
-    if (!adTitle.value || !adDesc.value || !adLink.value) {
+    if (!adTitle.value || !adDesc.value || !adLink.value || !adUsername.value || !adReward.value) {
       alert("❗ Please fill in all fields");
       return;
     }
@@ -38,7 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("desc", adDesc.value.trim());
     formData.append("tags", adTags.value.trim());
     formData.append("link", adLink.value.trim());
-    formData.append("reward", adReward.value.trim()); 
+    formData.append("username", adUsername.value.trim()); // username
+    formData.append("reward", adReward.value.trim()); // reward
     formData.append("image", file);
 
     uploadBtn.disabled = true;
@@ -58,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
         adTags.value = "";
         adLink.value = "";
         adReward.value = "";
+        adUsername.value = "";
         adImage.value = "";
       } else {
         alert("❌ Error: " + (data.error || "Unknown error"));
