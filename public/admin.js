@@ -72,14 +72,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-const deleteTagInput = document.getElementById("deleteTagInput");
+const deleteUsernameInput = document.getElementById("deleteUsernameInput");
 const deleteAdBtn = document.getElementById("deleteAdBtn");
 const deleteResult = document.getElementById("deleteResult");
 
 deleteAdBtn.addEventListener("click", async () => {
-  const tag = deleteTagInput.value.trim();
-  if (!tag) {
-    deleteResult.textContent = "❗ Type your tag";
+  const username = deleteUsernameInput.value.trim();
+  if (!username) {
+    deleteResult.textContent = "❗ Type the username";
     return;
   }
 
@@ -87,13 +87,13 @@ deleteAdBtn.addEventListener("click", async () => {
     const res = await fetch("/api/admin/ad", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tag })
+      body: JSON.stringify({ username })
     });
 
     const data = await res.json();
     if (res.ok) {
-      deleteResult.textContent = `✅ Ad(s) with tag "${tag}" deleted`;
-      deleteTagInput.value = "";
+      deleteResult.textContent = `✅ Ad(s) from username "${username}" deleted`;
+      deleteUsernameInput.value = "";
     } else {
       deleteResult.textContent = data.error || "❌ Error";
     }

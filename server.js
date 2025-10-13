@@ -179,12 +179,13 @@ app.get('/api/ads', async (req, res) => {
 // 🟢 admin block
 // ===============================
 
+// Удаление рекламы по username без проверки секретов
 app.delete('/api/admin/ad', async (req, res) => {
-  const { tag } = req.body;
-  if (!tag) return res.status(400).json({ error: 'Tag required' });
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: 'Username required' });
 
   try {
-    const result = await Ad.deleteMany({ tags: tag });
+    const result = await Ad.deleteMany({ username });
     res.json({ success: true, deletedCount: result.deletedCount });
   } catch (err) {
     console.error(err);
