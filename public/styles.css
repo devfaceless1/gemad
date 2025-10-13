@@ -399,53 +399,7 @@ main {
     color: #fff;
   }
 
-.admin-btn {
-  background: #2a3549;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 15px;
-  font-size: 16px;
-  cursor: pointer;
-  margin: 5px auto;
-  display: block;
-  font-weight: 600;
-  transition: background 0.2s ease;
-  margin-bottom: 60px;
-}
-.admin-btn:hover { background: #1a5edb; }
-
-.admin-page {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 20px;
-  color: #fff;
-}
-
-.admin-upload input[type="text"],
-.admin-upload input[type="file"] {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  background: #1e2533;
-  color: #fff;
-}
-
-.upload-btn {
-  background: #26a269;
-  color: #fff;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s ease;
-}
-.upload-btn:hover { background: #208e5d; }
-
-
+  
   #result{
     
     margin-top:18px;
