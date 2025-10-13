@@ -88,7 +88,7 @@ async function fetchAds() {
         desc: ad.desc,
         username: ad.username,
         link: ad.link,
-        image: ad.image ? `${window.location.origin}${ad.image}` : null, 
+        image: ad.image ? `${window.location.origin}${ad.image}` : null,
         video: ad.video || null,
         reward: ad.reward,
         tags: ad.tags || []
@@ -107,7 +107,7 @@ async function fetchAds() {
         desc: ad.desc,
         username: ad.username,
         link: ad.link,
-        image: ad.image,
+        image: ad.image || null,
         video: ad.video || null,
         reward: ad.reward,
         tags: ad.tags || []
@@ -116,6 +116,22 @@ async function fetchAds() {
   } catch (err) {
     console.error("Error loading ads from JSON:", err);
   }
+
+  const allAdsMap = new Map();
+  [...adsFromDB, ...adsFromJSON].forEach(ad => {
+    if (!allAdsMap.has(ad.title)) allAdsMap.set(ad.title, ad);
+  });
+
+  return Array.from(allAdsMap.values());
+}
+
+fetchAds().then(adData => {
+  allAds = adData;
+  hashtags = [...new Set(allAds.flatMap(ad => ad.tags))];
+  shuffleAds();
+  loadNextBatch();
+}).catch(err => console.error("Error fetching combined ads:", err));
+
 
   const allAdsMap = new Map();
   [...adsFromDB, ...adsFromJSON].forEach(ad => {
