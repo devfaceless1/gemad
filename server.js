@@ -141,7 +141,7 @@ app.post('/api/admin/uploadAd', upload.single('image'), async (req, res) => {
 
         if (req.file) {
         const result = await cloudinary.v2.uploader.upload(req.file.path, {
-            folder: 'ads_images'
+            folder: 'ads_images' 
         });
         imageUrl = result.secure_url; 
         fs.unlinkSync(req.file.path);
@@ -178,35 +178,18 @@ app.get('/api/ads', async (req, res) => {
 // ===============================
 // 🟢 admin block
 // ===============================
-// DELETE /api/admin/deleteAd
-app.delete('/api/admin/deleteAd', async (req, res) => {
-    try {
-        const { telegramId, username } = req.body;
 
-        if (!telegramId || telegramId !== process.env.ADMIN_TELEGRAM_ID) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
+app.delete('/api/admin/ad', async (req, res) => {
+  const { tag } = req.body;
+  if (!tag) return res.status(400).json({ error: 'Tag required' });
 
-        if (!username) {
-            return res.status(400).json({ error: 'Username required' });
-        }
-
-        const ad = await Ad.findOne({ username });
-        if (!ad) return res.status(404).json({ error: 'Ad not found' });
-
-        if (ad.image && ad.image.includes('res.cloudinary.com')) {
-            const parts = ad.image.split('/');
-            const filename = parts[parts.length - 1].split('.')[0];
-            await cloudinary.v2.uploader.destroy(filename);
-        }
-
-        await Ad.deleteOne({ username });
-
-        res.json({ success: true, message: `Ad ${username} deleted` });
-    } catch (err) {
-        console.error('Delete Ad error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
+  try {
+    const result = await Ad.deleteMany({ tags: tag });
+    res.json({ success: true, deletedCount: result.deletedCount });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 app.get('*', (req, res) => {

@@ -71,4 +71,38 @@ document.addEventListener("DOMContentLoaded", () => {
       uploadBtn.textContent = "📤 Publish Ad";
     }
   });
+
+const deleteTagInput = document.getElementById("deleteTagInput");
+const deleteAdBtn = document.getElementById("deleteAdBtn");
+const deleteResult = document.getElementById("deleteResult");
+
+deleteAdBtn.addEventListener("click", async () => {
+  const tag = deleteTagInput.value.trim();
+  if (!tag) {
+    deleteResult.textContent = "❗ Type your tag";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/ad", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tag })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      deleteResult.textContent = `✅ Ad(s) with tag "${tag}" deleted`;
+      deleteTagInput.value = "";
+    } else {
+      deleteResult.textContent = data.error || "❌ Error";
+    }
+  } catch (err) {
+    console.error(err);
+    deleteResult.textContent = "❌ Server error";
+  }
 });
+
+
+});
+
