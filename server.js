@@ -128,7 +128,7 @@ app.post("/api/admin/uploadAd", upload.single("image"), async (req, res) => {
     const { telegramId, title, desc, tags, link } = req.body;
     const image = req.file;
 
-    const ADMIN_ID = "123456789";
+    const ADMIN_ID = "7613674527";
 
     if (telegramId !== ADMIN_ID) {
       return res.status(403).json({ error: "Access denied" });
