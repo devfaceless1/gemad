@@ -166,6 +166,38 @@ fetchAds().then(adData => {
       </div>
     `;
 
+    // === ADD DELETE BUTTON FOR MONGODB ADS ===
+if (ad.fromDB) {  // предполагаем, что ты добавляешь поле fromDB при загрузке из Mongo
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "Delete";
+  deleteBtn.style.cssText = `
+    margin-left: 10px;
+    background: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  `;
+  
+  deleteBtn.addEventListener("click", async () => {
+    if (!confirm(`Delete ad "${ad.title}"?`)) return;
+    try {
+      const res = await fetch(`/api/ads/${ad._id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      container.removeChild(block); 
+      allAds = allAds.filter(a => a._id !== ad._id); 
+      console.log(`Ad "${ad.title}" deleted`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete ad");
+    }
+  });
+
+  block.querySelector(".ad-block__bottom").appendChild(deleteBtn);
+}
+
+
     block.querySelectorAll(".ad-block__hashtag, .hashtag-recommended").forEach(tag => {
       tag.style.cursor = "pointer";
       tag.addEventListener("click", () => {

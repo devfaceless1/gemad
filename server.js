@@ -111,16 +111,14 @@ app.post('/api/admin/reset-balances', async (req, res) => {
 });
 
 // ===============================
-// 🟢 ДОБАВЛЕНИЕ: АДМИНКА + РЕКЛАМА
+// 🟢 block admin + ad
 // ===============================
 import fs from 'fs';
 import multer from 'multer';
-import { Ad } from './adModel.js'; // Новая модель для рекламы
+import { Ad } from './adModel.js'; 
 
-// --- Настройка загрузки файлов ---
 const upload = multer({ dest: path.join(__dirname, 'public', 'uploads') });
 
-// === Добавление рекламы (админ) ===
 app.post('/api/admin/uploadAd', upload.single('image'), async (req, res) => {
     try {
         const { telegramId, title, desc, tags, link, reward, username } = req.body;
@@ -154,7 +152,6 @@ app.post('/api/admin/uploadAd', upload.single('image'), async (req, res) => {
     }
 });
 
-// === Получение всех реклам из MongoDB ===
 app.get('/api/ads', async (req, res) => {
     try {
         const ads = await Ad.find().sort({ createdAt: -1 });
@@ -164,8 +161,23 @@ app.get('/api/ads', async (req, res) => {
     }
 });
 // ===============================
-// 🟢 КОНЕЦ БЛОКА АДМИНКИ
+// 🟢 admin block
 // ===============================
+
+// ================= DELETE API =================
+app.delete("/api/ads/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ad = await Ads.findById(id);
+    if (!ad) return res.status(404).json({ error: "Ad not found" });
+    if (!ad.fromDB) return res.status(400).json({ error: "Cannot delete non-MongoDB ad" });
+
+    await Ads.findByIdAndDelete(id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
