@@ -75,25 +75,64 @@ document.addEventListener("DOMContentLoaded", () => {
   document.head.appendChild(style);
 
   // === FETCH ADS ===
-  fetch("/api/ads")
-  .then(res => res.json())
-  .then(adData => {
-    allAds = adData.map(ad => ({
-      title: ad.title,
-      desc: ad.desc,
-      username: ad.username,
-      link: ad.link,
-      image: ad.image,
-      video: ad.video || null,
-      reward: ad.reward,
-      tags: ad.tags || []
-    }));
-    hashtags = [...new Set(allAds.flatMap(ad => ad.tags))];
-    shuffleAds();
-    loadNextBatch();
-  })
-  .catch(err => console.error("Error loading ads:", err));
+async function fetchAds() {
+  let adsFromDB = [];
+  let adsFromJSON = [];
 
+  try {
+    const res = await fetch("/api/ads");
+    if (res.ok) {
+      const data = await res.json();
+      adsFromDB = data.map(ad => ({
+        title: ad.title,
+        desc: ad.desc,
+        username: ad.username,
+        link: ad.link,
+        image: ad.image,
+        video: ad.video || null,
+        reward: ad.reward,
+        tags: ad.tags || []
+      }));
+    }
+  } catch (err) {
+    console.error("Error loading ads from MongoDB:", err);
+  }
+
+  try {
+    const res = await fetch("ads.json");
+    if (res.ok) {
+      const data = await res.json();
+      adsFromJSON = data.map(ad => ({
+        title: ad.title,
+        desc: ad.desc,
+        username: ad.username,
+        link: ad.link,
+        image: ad.image,
+        video: ad.video || null,
+        reward: ad.reward,
+        tags: ad.tags || []
+      }));
+    }
+  } catch (err) {
+    console.error("Error loading ads from JSON:", err);
+  }
+
+  const allAdsMap = new Map();
+  [...adsFromDB, ...adsFromJSON].forEach(ad => {
+    if (!allAdsMap.has(ad.title)) allAdsMap.set(ad.title, ad);
+  });
+
+  return Array.from(allAdsMap.values());
+}
+
+fetchAds().then(adData => {
+  allAds = adData;
+  hashtags = [...new Set(allAds.flatMap(ad => ad.tags))];
+  shuffleAds();
+  loadNextBatch();
+}).catch(err => console.error("Error fetching combined ads:", err));
+
+  
 
   function shuffleAds() {
     allAds.sort(() => Math.random() - 0.5);
