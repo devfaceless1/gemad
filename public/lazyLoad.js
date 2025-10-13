@@ -88,7 +88,7 @@ async function fetchAds() {
         desc: ad.desc,
         username: ad.username,
         link: ad.link,
-        image: ad.image ? `${window.location.origin}${ad.image}` : null,
+        image: ad.image || null,
         video: ad.video || null,
         reward: ad.reward,
         tags: ad.tags || []

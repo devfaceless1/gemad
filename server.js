@@ -4,6 +4,13 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { User } from './userModel.js';
+import cloudinary from 'cloudinary';
+
+cloudinary.v2.config({ 
+  cloud_name: process.env.CLOUD_NAME, 
+  api_key: process.env.CLOUD_API_KEY, 
+  api_secret: process.env.CLOUD_API_SECRET 
+});
 
 dotenv.config();
 
@@ -119,7 +126,7 @@ import fs from 'fs';
 import multer from 'multer';
 import { Ad } from './adModel.js'; 
 
-const upload = multer({ dest: path.join(__dirname, 'public', 'uploads') });
+const upload = multer({ dest: 'tmp/' });
 
 app.post('/api/admin/uploadAd', upload.single('image'), async (req, res) => {
     try {
@@ -131,9 +138,15 @@ app.post('/api/admin/uploadAd', upload.single('image'), async (req, res) => {
             return res.status(400).json({ error: 'Missing fields' });
 
         let imageUrl = null;
+
         if (req.file) {
-            imageUrl = `/uploads/${req.file.filename}`;
+        const result = await cloudinary.v2.uploader.upload(req.file.path, {
+            folder: 'ads_images'
+        });
+        imageUrl = result.secure_url; 
+        fs.unlinkSync(req.file.path);
         }
+
 
         const ad = new Ad({
             title,
