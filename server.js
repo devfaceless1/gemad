@@ -22,6 +22,8 @@ mongoose.connect(process.env.MONGO_URI, {
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+
 
 
 app.post('/api/user/init', async (req, res) => {
