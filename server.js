@@ -164,21 +164,6 @@ app.get('/api/ads', async (req, res) => {
 // 🟢 admin block
 // ===============================
 
-// ================= DELETE API =================
-app.delete("/api/ads/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const ad = await Ads.findById(id);
-    if (!ad) return res.status(404).json({ error: "Ad not found" });
-    if (!ad.fromDB) return res.status(400).json({ error: "Cannot delete non-MongoDB ad" });
-
-    await Ads.findByIdAndDelete(id);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
