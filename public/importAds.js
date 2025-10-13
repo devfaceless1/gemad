@@ -6,9 +6,10 @@ import { Ad } from "./adModel.js";
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI;
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const adsFile = path.join(__dirname, "ads.json");
 
-mongoose.connect(MONGO_URI, {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -18,8 +19,6 @@ mongoose.connect(MONGO_URI, {
   process.exit(1);
 });
 
-// Читаем ads.json
-const adsFile = path.join(process.cwd(), "ads.json");
 const rawData = fs.readFileSync(adsFile, "utf-8");
 const ads = JSON.parse(rawData);
 
@@ -32,7 +31,7 @@ async function importAds() {
           title: ad.title,
           username: ad.username || "",
           desc: ad.desc,
-          image: ad.image || null,
+          image: ad.image ? `/${ad.image}` : null, // <- путь относительно public
           video: ad.video || null,
           link: ad.link,
           tags: ad.tags || [],
