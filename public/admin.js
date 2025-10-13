@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const adDesc = document.getElementById("adDesc");
   const adTags = document.getElementById("adTags");
   const adLink = document.getElementById("adLink");
+  const adReward = document.getElementById("adReward"); 
 
   // === Проверка: показывать ли кнопку ===
   const tg = window.Telegram.WebApp;
@@ -37,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("desc", adDesc.value.trim());
     formData.append("tags", adTags.value.trim());
     formData.append("link", adLink.value.trim());
+    formData.append("reward", adReward.value.trim()); 
     formData.append("image", file);
 
     uploadBtn.disabled = true;
@@ -55,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
         adDesc.value = "";
         adTags.value = "";
         adLink.value = "";
+        adReward.value = "";
         adImage.value = "";
       } else {
         alert("❌ Error: " + (data.error || "Unknown error"));
