@@ -111,6 +111,66 @@ app.post('/api/admin/reset-balances', async (req, res) => {
 });
 
 
+// === 📢 ADMIN: Upload Ads ===
+import multer from "multer";
+import fs from "fs";
+
+const ADS_FILE = path.join(__dirname, "public", "ads.json");
+const upload = multer({ dest: path.join(__dirname, "public", "uploads/") });
+
+
+if (!fs.existsSync(ADS_FILE)) {
+  fs.writeFileSync(ADS_FILE, "[]", "utf8");
+}
+
+app.post("/api/admin/uploadAd", upload.single("image"), async (req, res) => {
+  try {
+    const { telegramId, title, desc, tags, link } = req.body;
+    const image = req.file;
+
+    const ADMIN_ID = "123456789";
+
+    if (telegramId !== ADMIN_ID) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    if (!image) {
+      return res.status(400).json({ error: "No image uploaded" });
+    }
+
+    const ads = JSON.parse(fs.readFileSync(ADS_FILE, "utf8"));
+
+    const newAd = {
+      title,
+      desc,
+      link,
+      image: `/uploads/${image.filename}`,
+      tags: tags ? tags.split(",").map(t => t.trim()) : [],
+      date: new Date().toISOString()
+    };
+
+    ads.push(newAd);
+    fs.writeFileSync(ADS_FILE, JSON.stringify(ads, null, 2));
+
+    res.json({ success: true, ad: newAd });
+  } catch (err) {
+    console.error("Error uploading ad:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.get("/api/ads", (req, res) => {
+  try {
+    const ads = JSON.parse(fs.readFileSync(ADS_FILE, "utf8"));
+    res.json(ads);
+  } catch (err) {
+    console.error("Error reading ads.json:", err);
+    res.status(500).json({ error: "Cannot read ads" });
+  }
+});
+
+
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

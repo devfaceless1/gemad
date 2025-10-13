@@ -131,6 +131,42 @@
       
       </div>
     </section>
+    <button id="adminPanelBtn" style="display:none;" class="admin-btn">
+  ⚙️ Admin Panel
+</button>
+
+<!-- === ADMIN PAGE === -->
+<section id="page-admin" class="page">
+  <div class="admin-page">
+    <h1 class="section__title">Admin Panel</h1>
+
+    <div class="admin-upload">
+      <label for="adImage">📸 Upload image:</label>
+      <input type="file" id="adImage" accept="image/*" />
+
+      <label for="adTitle">Title:</label>
+      <input type="text" id="adTitle" placeholder="Ad title" />
+
+      <label for="adDesc">Description:</label>
+      <input type="text" id="adDesc" placeholder="Ad description" />
+
+      <label for="adTags">Hashtags (comma separated):</label>
+      <input type="text" id="adTags" placeholder="#fun, #business" />
+
+      <label for="adLink">Link:</label>
+      <input type="text" id="adLink" placeholder="https://..." />
+
+      <button id="uploadAdBtn" class="upload-btn">📤 Publish Ad</button>
+    </div>
+
+    <a class="back-button" href="#" onclick="showPage('page-main', event)">
+      <img style="width: 25px; height: 25px;" src="images/left-arrow.svg" alt="back">
+    </a>
+  </div>
+</section>
+
+
+
   </main>
 
   <!-- Footer -->
@@ -148,6 +184,7 @@
   </footer>
 
   <!-- tg + nav -->
+   <script src="admin.js"></script>
    <script src="spin.js"></script>
    <script src="cases.js"></script>
 <script>
