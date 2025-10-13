@@ -75,14 +75,25 @@ document.addEventListener("DOMContentLoaded", () => {
   document.head.appendChild(style);
 
   // === FETCH ADS ===
-  fetch("ads.json")
-    .then(res => res.json())
-    .then(adData => {
-      allAds = adData;
-      hashtags = [...new Set(allAds.flatMap(ad => ad.tags))];
-      shuffleAds();
-      loadNextBatch();
-    });
+  fetch("/api/ads")
+  .then(res => res.json())
+  .then(adData => {
+    allAds = adData.map(ad => ({
+      title: ad.title,
+      desc: ad.desc,
+      username: ad.username,
+      link: ad.link,
+      image: ad.image,
+      video: ad.video || null,
+      reward: ad.reward,
+      tags: ad.tags || []
+    }));
+    hashtags = [...new Set(allAds.flatMap(ad => ad.tags))];
+    shuffleAds();
+    loadNextBatch();
+  })
+  .catch(err => console.error("Error loading ads:", err));
+
 
   function shuffleAds() {
     allAds.sort(() => Math.random() - 0.5);
