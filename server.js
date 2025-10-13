@@ -110,6 +110,63 @@ app.post('/api/admin/reset-balances', async (req, res) => {
     res.json({ ok: true, modifiedCount: result.modifiedCount ?? result.nModified ?? result });
 });
 
+// ===============================
+// 🟢 ДОБАВЛЕНИЕ: АДМИНКА + РЕКЛАМА
+// ===============================
+import fs from 'fs';
+import multer from 'multer';
+import { Ad } from './adModel.js'; // Новая модель для рекламы
+
+// --- Настройка загрузки файлов ---
+const upload = multer({ dest: path.join(__dirname, 'public', 'uploads') });
+
+// === Добавление рекламы (админ) ===
+app.post('/api/admin/uploadAd', upload.single('image'), async (req, res) => {
+    try {
+        const { telegramId, title, desc, tags, link, reward, username } = req.body;
+        if (!telegramId || telegramId !== process.env.ADMIN_TELEGRAM_ID)
+            return res.status(403).json({ error: 'Access denied' });
+
+        if (!title || !desc || !link || !reward)
+            return res.status(400).json({ error: 'Missing fields' });
+
+        let imageUrl = null;
+        if (req.file) {
+            imageUrl = `/uploads/${req.file.filename}`;
+        }
+
+        const ad = new Ad({
+            title,
+            username: username || "",
+            desc,
+            image: imageUrl,
+            link,
+            tags: tags ? tags.split(" ").map(t => t.trim()) : [],
+            reward
+        });
+
+        await ad.save();
+
+        res.json({ success: true, ad });
+    } catch (err) {
+        console.error("Upload error:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+// === Получение всех реклам из MongoDB ===
+app.get('/api/ads', async (req, res) => {
+    try {
+        const ads = await Ad.find().sort({ createdAt: -1 });
+        res.json(ads);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to load ads' });
+    }
+});
+// ===============================
+// 🟢 КОНЕЦ БЛОКА АДМИНКИ
+// ===============================
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
