@@ -458,6 +458,48 @@ if (footer && isMobile) {
   });
 }
 
+const deleteTagInput = document.getElementById("deleteTagInput");
+const deleteAdBtn = document.getElementById("deleteAdBtn");
+const deleteResult = document.getElementById("deleteResult");
+
+deleteAdBtn.addEventListener("click", async () => {
+  const tag = deleteTagInput.value.trim();
+  if (!tag) {
+    deleteResult.textContent = "Type your tag";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/ad", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-secret": ADMIN_SECRET 
+      },
+      body: JSON.stringify({ tag })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      deleteResult.textContent = `Ad with tag "${tag}" is deleted`;
+      deleteTagInput.value = "";
+
+      container.innerHTML = "";
+      displayedCount = 0;
+      allLoaded = false;
+      fetchAds().then(adData => {
+        allAds = adData;
+        shuffleAds();
+        loadNextBatch();
+      });
+    } else {
+      deleteResult.textContent = data.error || "Error";
+    }
+  } catch (err) {
+    console.error(err);
+    deleteResult.textContent = "Server error";
+  }
+});
 
 
 });
