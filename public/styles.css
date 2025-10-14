@@ -400,11 +400,12 @@ main {
   }
 
   .admin-btn {
-  background: #2b7cff;
+  background: #204c94;
   color: white;
   border: none;
   border-radius: 12px;
   padding: 12px 20px;
+  font-family: "Lexend", sans-serif;
   font-size: 16px;
   cursor: pointer;
   margin: 20px auto;
@@ -415,36 +416,61 @@ main {
 .admin-btn:hover { background: #1a5edb; }
 
 .admin-page {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 20px;
-  color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    color: #fff;
+    margin-bottom: 90px;
 }
 
 .admin-upload input[type="text"],
 .admin-upload input[type="file"] {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  background: #1e2533;
-  color: #fff;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #1e2533;
+    color: #fff;
+    margin: 10px 0;
 }
 
 .upload-btn {
-  background: #26a269;
-  color: #fff;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s ease;
+    background: #26a269;
+    color: #fff;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease;
 }
 .upload-btn:hover { background: #208e5d; }
 
+.admin-delete-ad input[type="text"],
+.admin-delete-ad input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #1e2533;
+    color: #fff;
+    margin: 10px 0;
+}
   
+.deleteAdBtn{
+    background: #cc2020;
+    color: #fff;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.deleteAdBtn:hover { background: #810e0e; }
+
   #result{
     
     margin-top:18px;
