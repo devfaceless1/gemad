@@ -458,7 +458,7 @@ main {
     margin: 10px 0;
 }
   
-.deleteAdBtn{
+.delete-ad-btn{
     background: #cc2020;
     color: #fff;
     padding: 12px;
@@ -469,7 +469,7 @@ main {
     transition: background 0.2s ease;
 }
 
-.deleteAdBtn:hover { background: #810e0e; }
+.delete-ad-btn:hover { background: #810e0e; }
 
   #result{
     
