@@ -205,36 +205,17 @@ app.delete("/api/admin/ad", async (req, res) => {
 
 
 app.post('/api/user/check-subscription', async (req, res) => {
-    const { telegramId, channel } = req.body;
-    if (!telegramId || !channel) return res.status(400).json({ error: 'Missing fields' });
+    const { telegramId, channel, reward } = req.body;
+    if (!telegramId || !channel || !reward) return res.json({ ok: false });
 
-    try {
-        const existing = await PendingSub.findOne({
-            telegramId,
-            channel,
-            status: { $in: ['waiting', 'rewarded'] } 
-        });
+    const exists = await Pending.findOne({ telegramId, channel, status: "waiting" });
+    if (exists) return res.json({ ok: false, message: "Already pending" });
 
-        if (existing) {
-            return res.json({ ok: false, error: 'You already submitted for this channel!' });
-        }
-
-        const checkAfter = new Date(Date.now() + 5 * 60 * 1000); 
-
-        await PendingSub.create({
-            telegramId,
-            channel,
-            checkAfter,
-            status: 'waiting'
-        });
-
-        res.json({ ok: true, message: '✅ We will check your subscription in 5 minutes.' });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ ok: false, error: 'Database error' });
-    }
+    const checkAfter = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
+    await Pending.create({ telegramId, channel, reward, status: "waiting", checkAfter });
+    res.json({ ok: true });
 });
+
 
 
 
