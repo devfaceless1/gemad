@@ -5,6 +5,28 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { User } from './userModel.js';
 import cloudinary from 'cloudinary';
+import crypto from "crypto";
+
+function verifyTelegramInitData(initData, botToken) {
+  try {
+    const secret = crypto.createHash("sha256").update(botToken).digest();
+    const parsed = new URLSearchParams(initData);
+    const hash = parsed.get("hash");
+    parsed.delete("hash");
+
+    const dataCheckString = [...parsed.entries()]
+      .map(([key, value]) => `${key}=${value}`)
+      .sort()
+      .join("\n");
+
+    const hmac = crypto.createHmac("sha256", secret).update(dataCheckString).digest("hex");
+    return hmac === hash;
+  } catch (e) {
+    console.error("Telegram data verify error:", e);
+    return false;
+  }
+}
+
 
 cloudinary.v2.config({ 
   cloud_name: process.env.CLOUD_NAME, 
@@ -179,39 +201,33 @@ app.get('/api/ads', async (req, res) => {
 // 🟢 admin block
 // ===============================
 
-// Удаление рекламы по username без проверки секретов
-deleteAdBtn.addEventListener("click", async () => {
-  const username = deleteUsernameInput.value.trim();
-  if (!username) {
-    deleteResult.textContent = "❗ Type the username";
-    return;
+app.delete("/api/admin/ad", async (req, res) => {
+  const { username, initData } = req.body;
+
+  if (!initData || !verifyTelegramInitData(initData)) {
+    return res.status(403).json({ error: "Invalid or missing Telegram data" });
   }
 
-  const tg = window.Telegram.WebApp;
-  const user = tg.initDataUnsafe?.user;
+  const tgData = new URLSearchParams(initData);
+  const telegramId = tgData.get("user[id]");
+
+  if (telegramId !== process.env.ADMIN_TELEGRAM_ID) {
+    return res.status(403).json({ error: "Access denied" });
+  }
+
+  if (!username) {
+    return res.status(400).json({ error: "Username required" });
+  }
 
   try {
-    const res = await fetch("/api/admin/ad", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username,
-        telegramId: user?.id
-      })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      deleteResult.textContent = `✅ Ad(s) from username "${username}" deleted (${data.deletedCount})`;
-      deleteUsernameInput.value = "";
-    } else {
-      deleteResult.textContent = data.error || "❌ Error";
-    }
+    const result = await Ad.deleteMany({ username });
+    res.json({ success: true, deletedCount: result.deletedCount });
   } catch (err) {
     console.error(err);
-    deleteResult.textContent = "❌ Server error";
+    res.status(500).json({ error: "Server error" });
   }
 });
+
 
 
 app.get('*', (req, res) => {

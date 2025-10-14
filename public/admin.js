@@ -83,11 +83,23 @@ deleteAdBtn.addEventListener("click", async () => {
     return;
   }
 
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+
+  const ADMIN_TELEGRAM_ID = "7613674527";
+  if (!user || String(user.id) !== ADMIN_TELEGRAM_ID) {
+    deleteResult.textContent = "🚫 Access denied (not admin)";
+    return;
+  }
+
   try {
     const res = await fetch("/api/admin/ad", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username })
+      body: JSON.stringify({
+        username,
+        telegramId: user.id 
+      })
     });
 
     const data = await res.json();
@@ -102,6 +114,7 @@ deleteAdBtn.addEventListener("click", async () => {
     deleteResult.textContent = "❌ Server error";
   }
 });
+
 
 
 });
