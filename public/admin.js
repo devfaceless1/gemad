@@ -92,11 +92,15 @@ deleteAdBtn.addEventListener("click", async () => {
     return;
   }
 
-  const res = await fetch("/api/admin/ad", {
-  method: "DELETE",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ username, telegramId: user.id })
-});
+  try {
+    const res = await fetch("/api/admin/ad", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+    username,
+    telegramId: user.id  
+    })
+  });
 
 
     const data = await res.json();
