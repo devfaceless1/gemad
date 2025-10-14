@@ -404,18 +404,17 @@ main {
   border-top: 1px solid rgba(255,255,255,0.4);
   border-left: 1px solid rgba(255,255,255,0.3);
   color: white;
-  border: none;
   border-radius: 12px;
   padding: 10px 10px;
   font-family: "Lexend", sans-serif;
   font-size: 16px;
   cursor: pointer;
-  margin: 20px auto;
+  margin: 10px auto;
   display: block;
   font-weight: 600;
   transition: background 0.2s ease;
 }
-.admin-btn:hover { background: #1a5edb; }
+.admin-btn:hover { background: #3b4964; }
 
 .admin-page {
     display: flex;
