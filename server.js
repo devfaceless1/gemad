@@ -204,9 +204,10 @@ app.get('/api/ads', async (req, res) => {
 app.delete("/api/admin/ad", async (req, res) => {
   const { username, initData } = req.body;
 
-  if (!initData || !verifyTelegramInitData(initData)) {
+  if (!initData || !verifyTelegramInitData(initData, process.env.BOT_TOKEN)) {
     return res.status(403).json({ error: "Invalid or missing Telegram data" });
-  }
+}
+
 
   const tgData = new URLSearchParams(initData);
   const telegramId = tgData.get("user[id]");
