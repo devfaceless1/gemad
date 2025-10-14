@@ -183,10 +183,11 @@ app.get('/api/ads', async (req, res) => {
 app.delete("/api/admin/ad", async (req, res) => {
   const { username, telegramId } = req.body;
 
-  // Проверяем, есть ли твой телеграм ID
-  if (!telegramId || telegramId !== process.env.ADMIN_TELEGRAM_ID) {
-    return res.status(403).json({ error: "Access denied" });
-  }
+
+  if (!telegramId || String(telegramId) !== process.env.ADMIN_TELEGRAM_ID) {
+  return res.status(403).json({ error: "Access denied" });
+}
+
 
   if (!username) {
     return res.status(400).json({ error: "Username required" });
