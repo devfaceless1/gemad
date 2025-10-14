@@ -5,7 +5,28 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { User } from './userModel.js';
 import cloudinary from 'cloudinary';
+import { PendingSub } from './pendingModel.js';
 
+app.post('/api/user/check-subscription', async (req, res) => {
+    const { telegramId, channel } = req.body;
+    if (!telegramId || !channel) return res.status(400).json({ error: 'Missing fields' });
+
+    const checkAfter = new Date(Date.now() + 12 * 60 * 60 * 1000); // +12 часов
+
+    try {
+        await PendingSub.create({
+            telegramId,
+            channel,
+            checkAfter,
+            status: 'waiting'
+        });
+
+        res.json({ ok: true, message: '✅ Отлично! Мы проверим подписку через 12 часов.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
 
 cloudinary.v2.config({ 
   cloud_name: process.env.CLOUD_NAME, 
@@ -201,31 +222,6 @@ app.delete("/api/admin/ad", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
-
-app.post('/api/user/check-subscription', async (req, res) => {
-  const { telegramId, channel } = req.body;
-  if (!telegramId || !channel) {
-    return res.status(400).json({ error: 'Missing telegramId or channel' });
-  }
-
-  const checkAfter = new Date(Date.now() + 12 * 60 * 60 * 1000); 
-
-  try {
-    await PendingSub.create({
-      telegramId,
-      channel,
-      checkAfter,
-      status: 'waiting'
-    });
-
-    res.json({ ok: true, message: '✅ Come back after 12hours.' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
 
 
 app.get('*', (req, res) => {
