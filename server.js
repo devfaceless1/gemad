@@ -206,40 +206,26 @@ app.delete("/api/admin/ad", async (req, res) => {
 
 
 app.post('/api/user/check-subscription', async (req, res) => {
-    try {
-        const { telegramId, channel, reward } = req.body;
-        if (!telegramId || !channel || !reward) {
-            console.log("❌ Missing fields:", req.body);
-            return res.json({ ok: false, message: "Missing fields" });
-        }
+    const { telegramId, channel, reward } = req.body;
 
-
-        const exists = await Pending.findOne({ telegramId, channel, status: "waiting" });
-        if (exists) {
-            console.log("⚠ Already pending:", telegramId, channel);
-            return res.json({ ok: false, message: "Already pending" });
-        }
-
-        const checkAfter = new Date(Date.now() + 2 * 60 * 1000); // 5 минут
-
-        const pendingDoc = new Pending({
-            telegramId,
-            channel,
-            reward: Number(reward),
-            status: "waiting",
-            checkAfter
-        });
-
-        const saved = await pendingDoc.save();
-        console.log("✅ Pending saved:", saved);
-
-        return res.json({ ok: true });
-    } catch (err) {
-        console.error("❌ Error in /check-subscription:", err);
-        return res.json({ ok: false, message: "Server error" });
+    if (!telegramId || !channel) {
+        console.log("❌ Missing fields:", req.body);
+        return res.json({ ok: false, message: "Missing fields" });
     }
-});
 
+    const existing = await Pending.findOne({ telegramId, channel, status: 'waiting' });
+    if (existing) {
+        return res.json({ ok: false, message: "You already submitted this channel!" });
+    }
+
+    const rewardAmount = reward ? Number(reward) : 15; 
+    const checkAfter = new Date(Date.now() + 5 * 60 * 1000); 
+
+    const pendingDoc = new Pending({ telegramId, channel, reward: rewardAmount, checkAfter });
+    await pendingDoc.save();
+
+    res.json({ ok: true, message: "✅ Your subscription will be checked in 5 minutes!" });
+});
 
 
 app.get('*', (req, res) => {

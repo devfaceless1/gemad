@@ -68,27 +68,37 @@ document.body.addEventListener('click', async (e) => {
     if (!channelUrl || channelUrl === '#') return;
 
     const channelUsername = channelUrl.replace('https://t.me/', '').replace('/', '');
-
     if (window.subscribedChannels.has(channelUsername)) {
         showMessage('You already received stars for this channel!', 'error');
         return;
     }
 
-    const res = await fetch('/api/user/check-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramId, channel: channelUsername })
-    });
+    const starsMatch = link.textContent.match(/\d+/);
+    const starsToAdd = starsMatch ? parseInt(starsMatch[0], 10) : 15; // дефолт 15
 
-    const data = await res.json();
+    try {
+        const res = await fetch('/api/user/check-subscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                telegramId,
+                channel: channelUsername,
+                reward: starsToAdd
+            })
+        });
 
-    if (data.ok) {
-        showMessage('✅ Great! We will check your subscription in 12 hours.');
-    } else {
+        const data = await res.json();
+        if (data.ok) {
+            showMessage(data.message, 'success');
+        } else {
+            showMessage(data.message, 'error');
+        }
+
+        tg.openLink(`https://t.me/${channelUsername}`);
+    } catch (err) {
         showMessage('❌ Something went wrong, try again later.', 'error');
+        console.error(err);
     }
-
-    tg.openLink(`https://t.me/${channelUsername}`);
 });
 
 
