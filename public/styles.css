@@ -400,10 +400,9 @@ main {
   }
 
   .admin-btn {
-  background: rgba(255,255,255,0.4);
-  border-top: rgba(255,255,255,0.4);
-  border-left: rgba(255,255,255,0.3);
-  backdrop-filter: blur(2px);
+  background: #2a3549a1;
+  border-top: 1px solid rgba(255,255,255,0.4);
+  border-left: 1px solid rgba(255,255,255,0.3);
   color: white;
   border: none;
   border-radius: 12px;
