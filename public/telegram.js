@@ -75,12 +75,41 @@
             return;
         }
 
-        // Получаем количество звезд из текста ссылки
         const starsMatch = link.textContent.match(/\d+/);
         const starsToAdd = starsMatch ? parseInt(starsMatch[0], 10) : 0;
 
-        await updateBalance(starsToAdd, channelUsername);
-        showMessage(`You earned ${starsToAdd} ⭐!`, 'success');
+document.body.addEventListener('click', async (e) => {
+    const link = e.target.closest('.ad-link');
+    if (!link) return;
+
+    e.preventDefault();
+    const channelUrl = link.getAttribute('href');
+    if (!channelUrl || channelUrl === '#') return;
+
+    const channelUsername = channelUrl.replace('https://t.me/', '').replace('/', '');
+
+    if (window.subscribedChannels.has(channelUsername)) {
+        showMessage('You already received stars for this channel!', 'error');
+        return;
+    }
+
+    const res = await fetch('/api/user/check-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramId, channel: channelUsername })
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+        showMessage('✅ Great! We will check your subscription in 12 hours.');
+    } else {
+        showMessage('❌ Something went wrong, try again later.', 'error');
+    }
+
+    tg.openLink(`https://t.me/${channelUsername}`);
+});
+
 
         tg.openLink(`https://t.me/${channelUsername}`);
     });
