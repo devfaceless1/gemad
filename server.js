@@ -5,7 +5,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { User } from './userModel.js';
 import cloudinary from 'cloudinary';
-import { PendingSub } from './pendingModel.js';
+import { Pending } from './pendingModel.js'; 
+
 
 
 cloudinary.v2.config({ 
@@ -205,15 +206,35 @@ app.delete("/api/admin/ad", async (req, res) => {
 
 
 app.post('/api/user/check-subscription', async (req, res) => {
-    const { telegramId, channel, reward } = req.body;
-    if (!telegramId || !channel || !reward) return res.json({ ok: false });
+    try {
+        const { telegramId, channel, reward } = req.body;
+        if (!telegramId || !channel || !reward) {
+            return res.json({ ok: false, message: "Missing fields" });
+        }
 
-    const exists = await Pending.findOne({ telegramId, channel, status: "waiting" });
-    if (exists) return res.json({ ok: false, message: "Already pending" });
+        const exists = await Pending.findOne({ telegramId, channel, status: "waiting" });
+        if (exists) {
+            return res.json({ ok: false, message: "Already pending" });
+        }
 
-    const checkAfter = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
-    await Pending.create({ telegramId, channel, reward, status: "waiting", checkAfter });
-    res.json({ ok: true });
+        const checkAfter = new Date(Date.now() + 1 * 60 * 1000); 
+        const pendingDoc = new Pending({
+            telegramId,
+            channel,
+            reward: Number(reward), 
+            status: "waiting",
+            checkAfter
+        });
+
+        await pendingDoc.save();
+
+        console.log("✅ Pending created:", pendingDoc); 
+        return res.json({ ok: true });
+
+    } catch (err) {
+        console.error("❌ Error in /check-subscription:", err);
+        return res.json({ ok: false, message: "Server error" });
+    }
 });
 
 
