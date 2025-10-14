@@ -208,9 +208,19 @@ app.post('/api/user/check-subscription', async (req, res) => {
     const { telegramId, channel } = req.body;
     if (!telegramId || !channel) return res.status(400).json({ error: 'Missing fields' });
 
-    const checkAfter = new Date(Date.now() + 12 * 60 * 60 * 1000); // +12 часов
-
     try {
+        const existing = await PendingSub.findOne({
+            telegramId,
+            channel,
+            status: { $in: ['waiting', 'rewarded'] } 
+        });
+
+        if (existing) {
+            return res.json({ ok: false, error: 'You already submitted for this channel!' });
+        }
+
+        const checkAfter = new Date(Date.now() + 5 * 60 * 1000); 
+
         await PendingSub.create({
             telegramId,
             channel,
@@ -218,12 +228,14 @@ app.post('/api/user/check-subscription', async (req, res) => {
             status: 'waiting'
         });
 
-        res.json({ ok: true, message: '✅ Отлично! Мы проверим подписку через 12 часов.' });
+        res.json({ ok: true, message: '✅ We will check your subscription in 5 minutes.' });
+
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Database error' });
+        res.status(500).json({ ok: false, error: 'Database error' });
     }
 });
+
 
 
 app.get('*', (req, res) => {
