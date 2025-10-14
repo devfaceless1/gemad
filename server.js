@@ -209,34 +209,36 @@ app.post('/api/user/check-subscription', async (req, res) => {
     try {
         const { telegramId, channel, reward } = req.body;
         if (!telegramId || !channel || !reward) {
+            console.log("❌ Missing fields:", req.body);
             return res.json({ ok: false, message: "Missing fields" });
         }
 
+
         const exists = await Pending.findOne({ telegramId, channel, status: "waiting" });
         if (exists) {
+            console.log("⚠ Already pending:", telegramId, channel);
             return res.json({ ok: false, message: "Already pending" });
         }
 
-        const checkAfter = new Date(Date.now() + 1 * 60 * 1000); 
+        const checkAfter = new Date(Date.now() + 2 * 60 * 1000); // 5 минут
+
         const pendingDoc = new Pending({
             telegramId,
             channel,
-            reward: Number(reward), 
+            reward: Number(reward),
             status: "waiting",
             checkAfter
         });
 
-        await pendingDoc.save();
+        const saved = await pendingDoc.save();
+        console.log("✅ Pending saved:", saved);
 
-        console.log("✅ Pending created:", pendingDoc); 
         return res.json({ ok: true });
-
     } catch (err) {
         console.error("❌ Error in /check-subscription:", err);
         return res.json({ ok: false, message: "Server error" });
     }
 });
-
 
 
 
