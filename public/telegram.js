@@ -59,25 +59,6 @@
         if (channelUsername) window.subscribedChannels.add(channelUsername);
     }
 
-    // === Делегирование клика по ссылкам ===
-    document.body.addEventListener('click', async (e) => {
-        const link = e.target.closest('.ad-link');
-        if (!link) return;
-
-        e.preventDefault();
-        const channelUrl = link.getAttribute('href');
-        if (!channelUrl || channelUrl === '#') return;
-
-        const channelUsername = channelUrl.replace('https://t.me/', '').replace('/', '');
-
-        if (window.subscribedChannels.has(channelUsername)) {
-            showMessage('You already received stars for this channel!', 'error');
-            return;
-        }
-
-        const starsMatch = link.textContent.match(/\d+/);
-        const starsToAdd = starsMatch ? parseInt(starsMatch[0], 10) : 0;
-
 document.body.addEventListener('click', async (e) => {
     const link = e.target.closest('.ad-link');
     if (!link) return;
@@ -110,9 +91,6 @@ document.body.addEventListener('click', async (e) => {
     tg.openLink(`https://t.me/${channelUsername}`);
 });
 
-
-        tg.openLink(`https://t.me/${channelUsername}`);
-    });
 
     // --- Сообщения ---
     let messageContainer = document.getElementById('telegram-messages');
