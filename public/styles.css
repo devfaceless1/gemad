@@ -400,11 +400,14 @@ main {
   }
 
   .admin-btn {
-  background: #204c94;
+  background: rgba(255,255,255,0.4);
+  border-top: rgba(255,255,255,0.4);
+  border-left: rgba(255,255,255,0.3);
+  backdrop-filter: blur(2px);
   color: white;
   border: none;
   border-radius: 12px;
-  padding: 12px 20px;
+  padding: 10px 10px;
   font-family: "Lexend", sans-serif;
   font-size: 16px;
   cursor: pointer;
