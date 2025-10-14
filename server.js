@@ -5,27 +5,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { User } from './userModel.js';
 import cloudinary from 'cloudinary';
-import crypto from "crypto";
-
-function verifyTelegramInitData(initData, botToken) {
-  try {
-    const secret = crypto.createHash("sha256").update(botToken).digest();
-    const parsed = new URLSearchParams(initData);
-    const hash = parsed.get("hash");
-    parsed.delete("hash");
-
-    const dataCheckString = [...parsed.entries()]
-      .map(([key, value]) => `${key}=${value}`)
-      .sort()
-      .join("\n");
-
-    const hmac = crypto.createHmac("sha256", secret).update(dataCheckString).digest("hex");
-    return hmac === hash;
-  } catch (e) {
-    console.error("Telegram data verify error:", e);
-    return false;
-  }
-}
 
 
 cloudinary.v2.config({ 
@@ -202,17 +181,10 @@ app.get('/api/ads', async (req, res) => {
 // ===============================
 
 app.delete("/api/admin/ad", async (req, res) => {
-  const { username, initData } = req.body;
+  const { username, telegramId } = req.body;
 
-  if (!initData || !verifyTelegramInitData(initData, process.env.BOT_TOKEN)) {
-    return res.status(403).json({ error: "Invalid or missing Telegram data" });
-}
-
-
-  const tgData = new URLSearchParams(initData);
-  const telegramId = tgData.get("user[id]");
-
-  if (telegramId !== process.env.ADMIN_TELEGRAM_ID) {
+  // Проверяем, есть ли твой телеграм ID
+  if (!telegramId || telegramId !== process.env.ADMIN_TELEGRAM_ID) {
     return res.status(403).json({ error: "Access denied" });
   }
 
