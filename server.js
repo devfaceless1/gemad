@@ -203,6 +203,30 @@ app.delete("/api/admin/ad", async (req, res) => {
 });
 
 
+app.post('/api/user/check-subscription', async (req, res) => {
+  const { telegramId, channel } = req.body;
+  if (!telegramId || !channel) {
+    return res.status(400).json({ error: 'Missing telegramId or channel' });
+  }
+
+  const checkAfter = new Date(Date.now() + 12 * 60 * 60 * 1000); 
+
+  try {
+    await PendingSub.create({
+      telegramId,
+      channel,
+      checkAfter,
+      status: 'waiting'
+    });
+
+    res.json({ ok: true, message: '✅ Come back after 12hours.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
