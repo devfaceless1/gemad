@@ -180,18 +180,39 @@ app.get('/api/ads', async (req, res) => {
 // ===============================
 
 // Удаление рекламы по username без проверки секретов
-app.delete('/api/admin/ad', async (req, res) => {
-  const { username } = req.body;
-  if (!username) return res.status(400).json({ error: 'Username required' });
+deleteAdBtn.addEventListener("click", async () => {
+  const username = deleteUsernameInput.value.trim();
+  if (!username) {
+    deleteResult.textContent = "❗ Type the username";
+    return;
+  }
+
+  const tg = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
 
   try {
-    const result = await Ad.deleteMany({ username });
-    res.json({ success: true, deletedCount: result.deletedCount });
+    const res = await fetch("/api/admin/ad", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username,
+        telegramId: user?.id
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      deleteResult.textContent = `✅ Ad(s) from username "${username}" deleted (${data.deletedCount})`;
+      deleteUsernameInput.value = "";
+    } else {
+      deleteResult.textContent = data.error || "❌ Error";
+    }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    deleteResult.textContent = "❌ Server error";
   }
 });
+
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
