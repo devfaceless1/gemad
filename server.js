@@ -5,7 +5,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { User } from './userModel.js';
 import cloudinary from 'cloudinary';
-import { Pending } from './pendingModel.js'; 
+import Pending from './pendingModel.js';
+
 
 
 
