@@ -213,7 +213,9 @@ app.post('/api/user/check-subscription', async (req, res) => {
         return res.json({ ok: false, message: "Missing fields" });
     }
 
-    const existing = await Pending.findOne({ telegramId, channel, status: 'waiting' });
+    const formattedChannel = channel.startsWith('@') ? channel : `@${channel}`;
+
+    const existing = await Pending.findOne({ telegramId, channel: formattedChannel, status: 'waiting' });
     if (existing) {
         return res.json({ ok: false, message: "You already submitted this channel!" });
     }
@@ -221,7 +223,12 @@ app.post('/api/user/check-subscription', async (req, res) => {
     const rewardAmount = reward ? Number(reward) : 15; 
     const checkAfter = new Date(Date.now() + 5 * 60 * 1000); 
 
-    const pendingDoc = new Pending({ telegramId, channel, reward: rewardAmount, checkAfter });
+    const pendingDoc = new Pending({
+        telegramId,
+        channel: formattedChannel,
+        reward: rewardAmount,
+        checkAfter
+    });
     await pendingDoc.save();
 
     res.json({ ok: true, message: "✅ Your subscription will be checked in 5 minutes!" });
