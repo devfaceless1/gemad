@@ -235,6 +235,39 @@ app.post('/api/user/check-subscription', async (req, res) => {
     res.json({ ok: true, message: "✅ Your subscription will be checked in 5 minutes!" });
 });
 
+app.post('/api/user/inventory/add', async (req, res) => {
+    const { telegramId, gift } = req.body;
+    if (!telegramId || !gift) return res.json({ ok: false, error: 'Missing data' });
+
+    const user = await User.findOne({ telegramId });
+    if (!user) return res.json({ ok: false, error: 'User not found' });
+
+    const uid = Date.now() + Math.random().toString(36).substr(2, 5);
+    const giftObj = { uid, label: gift.label, img: gift.img, value: parseInt(gift.label.match(/\d+/)?.[0] || 0) };
+
+    user.inventory.push(giftObj);
+    await user.save();
+
+    res.json({ ok: true, inventory: user.inventory });
+});
+
+app.post('/api/user/inventory/sell', async (req, res) => {
+    const { telegramId, gift } = req.body;
+    if (!telegramId || !gift) return res.json({ ok: false, error: 'Missing data' });
+
+    const user = await User.findOne({ telegramId });
+    if (!user) return res.json({ ok: false, error: 'User not found' });
+
+    const index = user.inventory.findIndex(item => item.uid === gift.uid);
+    if (index === -1) return res.json({ ok: false, error: 'Gift not found' });
+
+    const giftValue = user.inventory[index].value || 0;
+    user.balance += giftValue;
+    user.inventory.splice(index, 1);
+    await user.save();
+
+    res.json({ ok: true, balance: user.balance, inventory: user.inventory });
+});
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
