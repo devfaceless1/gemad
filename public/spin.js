@@ -148,15 +148,7 @@ function createCase({
 
 
 
-function createCase({
-  id,
-  cost,
-  prizes,
-  buttonId,
-  resultId,
-  stripId,
-  viewportId
-}) {
+function createCase({ id, cost, prizes, buttonId, resultId, stripId, viewportId }) {
   const ITEM_WIDTH = 100;
   const GAP = 5;
   const FULL_W = ITEM_WIDTH + GAP;
@@ -168,11 +160,9 @@ function createCase({
   const viewport = document.getElementById(viewportId);
   const btn = document.getElementById(buttonId);
   const resultEl = document.getElementById(resultId);
-
   resultEl.style.marginTop = '10px';
   let totalItems = prizes.length * REPEAT;
 
-  // === Построение полоски с призами ===
   function buildStrip() {
     strip.innerHTML = '';
     for (let r = 0; r < REPEAT; r++) {
@@ -196,7 +186,6 @@ function createCase({
 
   buildStrip();
 
-  // === Случайный выбор с весами ===
   function weightedChoice(list) {
     const total = list.reduce((s, a) => s + Math.max(0, a.weight || 0), 0);
     if (total <= 0) return null;
@@ -212,8 +201,8 @@ function createCase({
     return 1 - Math.pow(1 - t, 3);
   }
 
-  // === Модальное окно победы ===
-  function showWinModal(prize, onTake, onSell) {
+  // === функция для модалки с действиями ===
+  function showWinModal(prize) {
     let modal = document.getElementById('win-modal');
     if (!modal) {
       modal = document.createElement('div');
@@ -241,47 +230,80 @@ function createCase({
       modal.appendChild(content);
       document.body.appendChild(modal);
 
-      btnTake.addEventListener('click', () => {
+      // обработчики кнопок
+      btnTake.addEventListener('click', async () => {
         modal.classList.remove('show');
-        if (onTake) onTake();
+        try {
+          const res = await fetch('/api/user/inventory/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegramId: window.telegramId, gift: prize })
+          });
+          const data = await res.json();
+          if (data.ok) {
+            window.renderInventory(data.inventory);
+            resultEl.textContent = `You took: ${prize.label}`;
+          } else {
+            resultEl.textContent = `Error: ${data.error}`;
+          }
+        } catch (err) {
+          console.error(err);
+          resultEl.textContent = 'Error taking gift';
+        }
       });
 
-      btnSell.addEventListener('click', () => {
+      btnSell.addEventListener('click', async () => {
         modal.classList.remove('show');
-        if (onSell) onSell();
+        try {
+          const res = await fetch('/api/user/inventory/sell', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegramId: window.telegramId, gift: prize })
+          });
+          const data = await res.json();
+          if (data.ok) {
+            window.userBalance = data.balance;
+            document.getElementById('stars-balance').textContent = `${window.userBalance} ⭐`;
+            window.renderInventory(data.inventory);
+            resultEl.textContent = `You sold: ${prize.label} 🤑`;
+          } else {
+            resultEl.textContent = `Error: ${data.error}`;
+          }
+        } catch (err) {
+          console.error(err);
+          resultEl.textContent = 'Error selling gift';
+        }
       });
     }
 
+    // обновляем сообщение
     document.getElementById('win-modal-message').textContent = `🎉 You won: ${prize.label}`;
     requestAnimationFrame(() => modal.classList.add('show'));
   }
 
-  // === КНОПКА СПИН ===
+  // === кнопка спина ===
   btn.addEventListener('click', async () => {
     if (btn.disabled) return;
     btn.disabled = true;
     resultEl.textContent = '';
 
     if (window.userBalance < cost) {
-      resultEl.textContent = `Not enough stars`;
+      resultEl.textContent = 'Not enough stars';
       btn.disabled = false;
       return;
     }
 
-    // Снимаем стоимость
     const res = await fetch("/api/user/spin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ telegramId: window.telegramId, cost })
     });
-
     const data = await res.json();
     if (data.error) {
       resultEl.textContent = data.error;
       btn.disabled = false;
       return;
     }
-
     window.userBalance = data.balance;
     document.getElementById('stars-balance').textContent = `${window.userBalance} ⭐`;
 
@@ -299,19 +321,14 @@ function createCase({
     let targetRepeat = baseRepeat + BASE_ROTATIONS + 1;
     let targetIndex = targetRepeat * prizes.length + choice;
     const maxSafeIndex = totalItems - prizes.length - 1;
-
     if (targetIndex > maxSafeIndex) {
       targetRepeat = Math.floor(REPEAT / 2);
       targetIndex = targetRepeat * prizes.length + choice;
-      if (targetIndex <= currentCenterIndex) {
-        targetIndex = Math.min(maxSafeIndex, currentCenterIndex + prizes.length);
-      }
+      if (targetIndex <= currentCenterIndex) targetIndex = Math.min(maxSafeIndex, currentCenterIndex + prizes.length);
     }
 
     const elementX = targetIndex * FULL_W;
-    const targetTranslate = vpCenter - elementX - (ITEM_WIDTH / 2);
-
-    let final = targetTranslate;
+    let final = vpCenter - elementX - (ITEM_WIDTH / 2);
     if (Math.abs(final - from) < 0.5) {
       const loopW = prizes.length * FULL_W;
       final -= loopW * (1 + Math.floor(Math.random() * 3));
@@ -323,44 +340,15 @@ function createCase({
       const eased = easeOutCubic(t);
       const cur = from + (final - from) * eased;
       strip.style.transform = `translateX(${cur}px)`;
-
       if (t < 1) requestAnimationFrame(raf);
       else {
         strip.style.transform = `translateX(${final}px)`;
         strip.dataset.x = String(final);
         const prize = prizes[choice];
-
-        // Показ модалки с кнопками
-        showWinModal(prizeData,
-  async () => {
-    const res = await fetch('/api/user/inventory/add', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ telegramId: window.telegramId, gift: prizeData })
-    });
-    const data = await res.json();
-    if(data.ok) window.renderInventory(data.inventory);
-  },
-  async () => {
-    const res = await fetch('/api/user/inventory/sell', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ telegramId: window.telegramId, gift: prizeData })
-    });
-    const data = await res.json();
-    if(data.ok) {
-      window.userBalance = data.balance;
-      document.getElementById('stars-balance').textContent = `${window.userBalance} ⭐`;
-      window.renderInventory(data.inventory);
-    }
-  }
-);
-
-
+        showWinModal(prize);
         btn.disabled = false;
       }
     }
     requestAnimationFrame(raf);
   });
 }
-
