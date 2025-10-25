@@ -26,7 +26,7 @@
 
         <div class="user-name info-item" id="name"></div>
 
-        <div class="stars-earned info-item" id="stars-earned">Earned: 0 ⭐</div>
+        <div class="stars-earned info-item" id="stars-earned">Earned: 0 stars</div>
       </div>
     </div>
     <div class="user-balance info-item">
@@ -120,8 +120,30 @@
   <button class="spin-btn" id="spin">Spin 150 ⭐</button>
   <div id="result"></div>
       <a class="back-button" href="#" onclick="showPage('page-cases', event)"> <img style="width: 25px; height: 25px;" src="images/left-arrow.svg" alt="back"> </a>
+    <div class="case2-rewards">
+        <h2 class="rewards-block__title">All available gifts</h2>
+        <div class="rewards-blocks">
+          
+          <div class="reward-block__item">
+            <img class="block-item__gif" src="gif/ring100.gif" alt="ring100">
+          </div>
+          <div class="reward-block__item">
+            <img class="block-item__gif" src="gif/trophy100.gif" alt="trophy100">
+          </div>
+          
+          <div class="reward-block__item">
+            <img class="block-item__gif" src="gif/cake50.gif" alt="cake50">
+          </div>
+          <div class="reward-block__item">
+            <img class="block-item__gif" src="gif/bear15.gif" alt="bear15">
+          </div>
+          <div class="reward-block__item">
+            <img class="block-item__gif" src="gif/heart15.gif" alt="heart15">
+          </div>
+        </div>
+      </div>  
+    </div>
       
-      </div>
     </section>
     <section id="case-oldmoney" class="page">
       <div class="case-durov">
@@ -134,10 +156,58 @@
   <button class="spin-btn" id="spin2">Spin 1000 ⭐</button>
   <div id="result2"></div>
       <a class="back-button" href="#" onclick="showPage('page-cases', event)"> <img style="width: 25px; height: 25px;" src="images/left-arrow.svg" alt="back"> </a>
-      
+      </div>
+      <div class="case2-rewards">
+        <h2 class="rewards-block__title">All available gifts</h2>
+        <div class="rewards-blocks">
+          
+          <div class="reward-block__item">
+            <img class="block-item__gif" src="gif/nft-monkey.gif" alt="bear15">
+          </div>
+          <div class="reward-block__item">
+            <img class="block-item__gif" src="gif/rocket.gif" alt="bear15">
+          </div>
+          
+          <div class="reward-block__item">
+            <img class="block-item__gif" src="gif/flowers.gif" alt="bear15">
+          </div>
+          <div class="reward-block__item">
+            <img class="block-item__gif" src="gif/rose.gif" alt="bear15">
+          </div>
+          <div class="reward-block__item">
+            <img class="block-item__gif" src="gif/bear15.gif" alt="bear15">
+          </div>
+        </div>
       </div>
     </section>
 
+
+    <section id="page-inventory" class="page">
+  <div class="section-gifts">
+    <div class="section-gifts__content">
+      <h1 class="section__title">Gifts: </h1>
+      
+      <div class="gifts-inventory">
+        <div class="gifts-blocks">
+          
+          <div class="gifts-block__item">
+            <img class="gift-item__gif" src="gif/nft-monkey.gif" alt="bear15">
+            <h2 class="gift-desc"></h2>
+            <div class="gift-buttons">
+            <button class="btn__sale-gift">Sale</button>
+            <button class="btn__take-gift">Take</button>
+            </div>
+          </div>
+        
+        </div>
+      </div>
+
+      <a class="back-button" href="#" onclick="showPage('page-ad', event)">
+        <img style="width: 25px; height: 25px;" src="images/left-arrow.svg" alt="back">
+      </a>
+    </div>
+  </div>
+</section>
     <!-- === ADMIN PAGE === -->
 <section id="page-admin" class="page">
   <div class="admin-page">
@@ -194,6 +264,9 @@
 <li class="footer-nav__item">
   <a class="ad-navigation" href="#" onclick="showPage('page-cases', event)">Cases <img class="svg" src="images/case.svg" alt="case-nav"> </a>
 </li>
+<li class="footer-nav__item">
+  <a class="ad-navigation" href="#" onclick="showPage('page-inventory', event)">Gifts <img class="svg" src="images/gifticon.svg" alt="user-inventory"> </a>
+</li>
       </ul>
     </div>
   </footer>
@@ -238,5 +311,6 @@
 
   <script src="telegram.js"></script> 
   <script src="spin.js"></script>
+  <script src="inventory.js"></script>
 </body>
 </html>

@@ -232,8 +232,81 @@ main {
 }
 
 
-/* Cases */
+/*Gifts*/
 
+.section-gifts{
+    display: flex;
+    width: 100%;
+    color: #fff;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.section-gifts__content {
+    margin-top: 15px;
+    padding: 0 10px;
+    margin-bottom: 85px;
+}
+
+
+.gifts-inventory{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    padding: 0 10px;
+    margin-bottom: 90px;
+}
+
+.gifts-blocks{
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 5px;
+    
+}
+
+.gift-buttons{
+    display: flex;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.gift-item__gif{
+    width: 110px;
+    height: 110px;
+}
+
+.gift-desc{
+    font-weight: 600;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+.gifts-block__item{
+    
+    background: #1e2533;
+    border-radius: 12px;
+    width: 150px;
+    height: 210px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    
+}
+
+.btn__sale-gift, .btn__take-gift{
+    display: flex;
+    color: #fff;
+    background-color: #53617a;
+    padding: 8px 15px;
+    border-radius: 8px;
+}
+
+
+/* Cases */
 .section-cases {
   display: flex;
     width: 100%;
@@ -313,8 +386,6 @@ main {
     display:flex;
     flex-direction:column;
     align-items:center;
-    
-    min-height:85vh;
     box-sizing:border-box;
     padding: 0 10px;
     margin-top: 15px;
@@ -398,6 +469,54 @@ main {
     background: #1e2533;
     color: #fff;
   }
+
+.case2-rewards{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    padding: 0 10px;
+    margin-bottom: 90px;
+}
+
+.rewards-blocks{
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 5px;
+    
+}
+
+.reward-block__item{
+    background: #1e2533;
+    border-radius: 12px;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#case-oldmoney{
+   
+    flex-direction: column;
+    gap: 5px;
+}
+
+
+.rewards-block__title{
+    color: #fff;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+
+
+.block-item__gif{
+    width: 75px;
+    height: 75px;
+}
 
   .admin-btn {
   background: #2a3549a1;
@@ -700,6 +819,7 @@ main {
 
 
 .hashtag-recommended{
+    
     background: #5a77a8;
     box-shadow: 0 0 5px #5a77a8;
     border-radius: 4px;
@@ -709,6 +829,73 @@ main {
     display: flex;
     
 }
+
+
+
+.win-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 10000;
+}
+
+.win-modal.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+
+.win-modal-content {
+  background-color: #1e2533;
+  color: white;
+  padding: 25px 25px;
+  border-radius: 16px;
+  text-align: center;
+  min-width: 290px;
+  max-width: 400px;
+}
+
+
+.win-modal button {
+  margin: 5px;
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.win-modal button.take {
+  background-color: #313e57; 
+  color: white;
+  transition: background 0.4s ease;
+}
+
+.win-modal button.take:hover{
+    background-color: #3b4964;
+}
+
+.win-modal button.sell {
+  background-color: #313e57; 
+  color: white;
+  transition: background 0.4s ease;
+}
+
+.win-modal button.sell:hover{
+    background-color: #3b4964;
+}
+
+
 
   @media (max-width:760px){
     :root{ --viewport-w:92vw; }
