@@ -193,7 +193,7 @@ function createCase({
     strip.style.transform = 'translateX(0px)';
     strip.dataset.x = '0';
   }
-  
+
   buildStrip();
 
   // === Случайный выбор с весами ===
@@ -331,50 +331,31 @@ function createCase({
         const prize = prizes[choice];
 
         // Показ модалки с кнопками
-        showWinModal(prize,
-          async () => {
-            // === Take gift API ===
-            try {
-              const res = await fetch('/api/user/inventory/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegramId: window.telegramId, gift: prize })
-              });
-              const data = await res.json();
-              if (data.ok) {
-                window.renderInventory(data.inventory);
-                resultEl.textContent = `You took: ${prize.label}`;
-              } else {
-                resultEl.textContent = `Error: ${data.error}`;
-              }
-            } catch (err) {
-              console.error(err);
-              resultEl.textContent = 'Error taking gift';
-            }
-          },
-          async () => {
-            // === Sell gift API ===
-            try {
-              const res = await fetch('/api/user/inventory/sell', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegramId: window.telegramId, gift: prize })
-              });
-              const data = await res.json();
-              if (data.ok) {
-                window.userBalance = data.balance;
-                document.getElementById('stars-balance').textContent = `${window.userBalance} ⭐`;
-                window.renderInventory(data.inventory);
-                resultEl.textContent = `You sold: ${prize.label} 🤑`;
-              } else {
-                resultEl.textContent = `Error: ${data.error}`;
-              }
-            } catch (err) {
-              console.error(err);
-              resultEl.textContent = 'Error selling gift';
-            }
-          }
-        );
+        showWinModal(prizeData,
+  async () => {
+    const res = await fetch('/api/user/inventory/add', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ telegramId: window.telegramId, gift: prizeData })
+    });
+    const data = await res.json();
+    if(data.ok) window.renderInventory(data.inventory);
+  },
+  async () => {
+    const res = await fetch('/api/user/inventory/sell', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ telegramId: window.telegramId, gift: prizeData })
+    });
+    const data = await res.json();
+    if(data.ok) {
+      window.userBalance = data.balance;
+      document.getElementById('stars-balance').textContent = `${window.userBalance} ⭐`;
+      window.renderInventory(data.inventory);
+    }
+  }
+);
+
 
         btn.disabled = false;
       }
